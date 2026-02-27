@@ -1,0 +1,111 @@
+import { MatrixPreset } from '@/types/matrix';
+
+export const PRESETS: MatrixPreset[] = [
+  {
+    id: 'hot-crazy',
+    name: 'Classic Hot-Crazy',
+    config: {
+      title: 'Universal Hot Crazy Matrix',
+      xAxisLabel: 'Hot Axis',
+      yAxisLabel: 'Crazy Axis',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: true,
+      diagonalPoints: { x1: 5, y1: 4, x2: 10, y2: 10 },
+    },
+    zones: [
+      { id: 'nogo', name: 'No-Go Zone', color: 'hsla(0, 70%, 60%, 0.5)', x1: 0, y1: 4, x2: 5, y2: 10 },
+      { id: 'fun', name: 'Fun Zone', color: 'hsla(270, 50%, 60%, 0.5)', x1: 5, y1: 4, x2: 8, y2: 7 },
+      { id: 'danger', name: 'Danger Zone', color: 'hsla(30, 90%, 55%, 0.5)', x1: 5, y1: 7, x2: 8, y2: 10 },
+      { id: 'date', name: 'Date Zone', color: 'hsla(195, 80%, 60%, 0.5)', x1: 8, y1: 5, x2: 10, y2: 8 },
+      { id: 'wife', name: 'Wife Zone', color: 'hsla(120, 70%, 55%, 0.5)', x1: 8, y1: 4, x2: 10, y2: 5 },
+      { id: 'unicorn', name: 'Unicorn Zone', color: 'hsla(300, 80%, 75%, 0.5)', x1: 8, y1: 8, x2: 10, y2: 10 },
+    ],
+    points: [],
+  },
+  {
+    id: 'enterprise-browser',
+    name: 'Enterprise Browser',
+    config: {
+      title: 'Enterprise Browser Matrix',
+      xAxisLabel: 'Capability',
+      yAxisLabel: 'Risk / Complexity',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: true,
+      diagonalPoints: { x1: 5, y1: 5, x2: 8, y2: 10 },
+    },
+    zones: [
+      { id: 'nogo', name: 'No-Go Zone', color: 'hsla(0, 70%, 60%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 10 },
+      { id: 'fun', name: 'Fun Zone', color: 'hsla(270, 50%, 60%, 0.5)', x1: 5, y1: 0, x2: 8, y2: 5 },
+      { id: 'danger', name: 'Crazy Zone', color: 'hsla(30, 90%, 55%, 0.5)', x1: 5, y1: 5, x2: 8, y2: 10 },
+      { id: 'date', name: 'Date Zone', color: 'hsla(195, 80%, 60%, 0.5)', x1: 8, y1: 5, x2: 10, y2: 8 },
+      { id: 'wife', name: 'Marriage Zone', color: 'hsla(120, 70%, 55%, 0.5)', x1: 8, y1: 2, x2: 10, y2: 5 },
+      { id: 'unicorn', name: 'Unicorn Zone', color: 'hsla(300, 80%, 75%, 0.5)', x1: 8, y1: 0, x2: 10, y2: 2 },
+    ],
+    points: [
+      {id:'1',name:'Island Browser',x:9,y:3.5},{id:'2',name:'Prisma Access Browser',x:9,y:3.5},
+      {id:'3',name:'Google Chrome Enterprise',x:8.8,y:4},{id:'4',name:'Microsoft Edge for Business',x:8.8,y:4},
+      {id:'5',name:'Google Chrome',x:7,y:4.7},{id:'6',name:'Mozilla Firefox',x:6.5,y:5},
+      {id:'7',name:'Safari',x:7,y:4.6},{id:'8',name:'Arc Browser',x:6.9,y:4.5},
+      {id:'9',name:'Tor Browser',x:6,y:6.8},{id:'10',name:'Brave Enterprise',x:7,y:5.2},
+      {id:'11',name:'Opera',x:3.8,y:7.2},{id:'12',name:'Vivaldi',x:3.9,y:7.6},
+      {id:'13',name:'UC Browser',x:3.2,y:7.3},{id:'14',name:'Pale Moon',x:2.1,y:7.2},
+    ],
+  },
+  {
+    id: 'blank',
+    name: 'Blank Template',
+    config: {
+      title: 'Custom Matrix',
+      xAxisLabel: 'X Axis',
+      yAxisLabel: 'Y Axis',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: false,
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+    },
+    zones: [],
+    points: [],
+  },
+];
+
+export const COLOR_SCHEMES: Record<string, Record<string, string>> = {
+  classic: {
+    nogo: 'hsla(0, 70%, 60%, 0.5)',
+    fun: 'hsla(270, 50%, 60%, 0.5)',
+    danger: 'hsla(30, 90%, 55%, 0.5)',
+    date: 'hsla(195, 80%, 60%, 0.5)',
+    wife: 'hsla(120, 70%, 55%, 0.5)',
+    unicorn: 'hsla(300, 80%, 75%, 0.5)',
+  },
+  dark: {
+    nogo: 'hsla(0, 50%, 30%, 0.6)',
+    fun: 'hsla(270, 40%, 30%, 0.6)',
+    danger: 'hsla(30, 60%, 30%, 0.6)',
+    date: 'hsla(195, 50%, 30%, 0.6)',
+    wife: 'hsla(120, 50%, 25%, 0.6)',
+    unicorn: 'hsla(300, 50%, 35%, 0.6)',
+  },
+  pastel: {
+    nogo: 'hsla(0, 60%, 82%, 0.5)',
+    fun: 'hsla(270, 50%, 82%, 0.5)',
+    danger: 'hsla(30, 70%, 82%, 0.5)',
+    date: 'hsla(195, 60%, 82%, 0.5)',
+    wife: 'hsla(120, 50%, 82%, 0.5)',
+    unicorn: 'hsla(300, 60%, 85%, 0.5)',
+  },
+  neon: {
+    nogo: 'hsla(350, 100%, 50%, 0.4)',
+    fun: 'hsla(280, 100%, 55%, 0.4)',
+    danger: 'hsla(40, 100%, 50%, 0.4)',
+    date: 'hsla(180, 100%, 45%, 0.4)',
+    wife: 'hsla(130, 100%, 45%, 0.4)',
+    unicorn: 'hsla(310, 100%, 60%, 0.4)',
+  },
+  monochrome: {
+    nogo: 'hsla(0, 0%, 30%, 0.4)',
+    fun: 'hsla(0, 0%, 45%, 0.4)',
+    danger: 'hsla(0, 0%, 55%, 0.4)',
+    date: 'hsla(0, 0%, 65%, 0.4)',
+    wife: 'hsla(0, 0%, 75%, 0.4)',
+    unicorn: 'hsla(0, 0%, 85%, 0.4)',
+  },
+};
