@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus, Move, CheckSquare } from 'lucide-react';
 import { DataPoint, Zone, MatrixConfig } from '@/types/matrix';
 import { parseCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { distributePoints } from '@/lib/distributePoints';
@@ -23,12 +24,17 @@ interface MatrixSidebarProps {
   onAddZone: (zone: Omit<Zone, 'id'>) => void;
   onUpdateZone: (id: string, partial: Partial<Zone>) => void;
   onDeleteZone: (id: string) => void;
+  selectedIds: Set<string>;
+  onSelectedIdsChange: (ids: Set<string>) => void;
+  onDeleteSelected: () => void;
+  onMassMove: (dx: number, dy: number) => void;
 }
 
 export function MatrixSidebar({
   config, points, zones,
   onUpdateConfig, onAddPoint, onUpdatePoint, onDeletePoint, onSetPoints,
   onAddZone, onUpdateZone, onDeleteZone,
+  selectedIds, onSelectedIdsChange, onDeleteSelected, onMassMove,
 }: MatrixSidebarProps) {
   const [newName, setNewName] = useState('');
   const [newX, setNewX] = useState('');
@@ -38,6 +44,8 @@ export function MatrixSidebar({
   const [editX, setEditX] = useState('');
   const [editY, setEditY] = useState('');
   const [editCategory, setEditCategory] = useState('');
+  const [massDx, setMassDx] = useState('0');
+  const [massDy, setMassDy] = useState('0');
   const fileRef = useRef<HTMLInputElement>(null);
   const iconRef = useRef<HTMLInputElement>(null);
   const zoneImageRef = useRef<HTMLInputElement>(null);
@@ -126,13 +134,34 @@ export function MatrixSidebar({
     setZoneImageUploadId(null);
   };
 
+  const toggleSelectAll = () => {
+    if (selectedIds.size === points.length) {
+      onSelectedIdsChange(new Set());
+    } else {
+      onSelectedIdsChange(new Set(points.map(p => p.id)));
+    }
+  };
+
+  const togglePoint = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    onSelectedIdsChange(next);
+  };
+
+  const handleApplyMassMove = () => {
+    const dx = parseFloat(massDx) || 0;
+    const dy = parseFloat(massDy) || 0;
+    if (dx === 0 && dy === 0) return;
+    onMassMove(dx, dy);
+    toast.success(`Moved ${selectedIds.size} points`);
+  };
+
   return (
     <div className="w-72 border-r border-border bg-card flex flex-col h-full">
-      {/* Hidden file inputs */}
       <input ref={iconRef} type="file" accept="image/*" className="hidden" onChange={handleIconUpload} />
       <input ref={zoneImageRef} type="file" accept="image/*" className="hidden" onChange={handleZoneImageUpload} />
 
-      {/* Section tabs */}
       <div className="flex border-b border-border">
         {(['config', 'points', 'zones'] as const).map(s => (
           <button key={s} onClick={() => setActiveSection(s)}
@@ -204,9 +233,44 @@ export function MatrixSidebar({
 
             <Separator />
 
+            {/* Selection controls */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold">Points ({points.length})</Label>
+                <Button variant="ghost" size="sm" className="h-6 text-[10px] px-2" onClick={toggleSelectAll}>
+                  <CheckSquare className="w-3 h-3 mr-1" />
+                  {selectedIds.size === points.length && points.length > 0 ? 'Deselect All' : 'Select All'}
+                </Button>
+              </div>
+
+              {/* Mass move controls - visible when selection exists */}
+              {selectedIds.size > 0 && (
+                <div className="p-2 rounded border border-border bg-muted/50 space-y-2">
+                  <Label className="text-[10px] font-semibold text-muted-foreground">{selectedIds.size} selected</Label>
+                  <div className="grid grid-cols-2 gap-1">
+                    <div>
+                      <Label className="text-[10px]">X offset</Label>
+                      <Input type="number" value={massDx} onChange={e => setMassDx(e.target.value)} className="h-6 text-xs" step="0.5" />
+                    </div>
+                    <div>
+                      <Label className="text-[10px]">Y offset</Label>
+                      <Input type="number" value={massDy} onChange={e => setMassDy(e.target.value)} className="h-6 text-xs" step="0.5" />
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="sm" variant="outline" className="flex-1 h-6 text-[10px]" onClick={handleApplyMassMove}>
+                      <Move className="w-3 h-3 mr-1" /> Move
+                    </Button>
+                    <Button size="sm" variant="destructive" className="h-6 text-[10px]" onClick={onDeleteSelected}>
+                      <Trash2 className="w-3 h-3 mr-1" /> Delete
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Points list */}
             <div className="space-y-1">
-              <Label className="text-xs font-semibold">Points ({points.length})</Label>
               {points.map(p => (
                 <div key={p.id} className="py-1 px-1 rounded hover:bg-muted text-xs group">
                   {editingId === p.id ? (
@@ -228,6 +292,11 @@ export function MatrixSidebar({
                     </div>
                   ) : (
                     <div className="flex items-center gap-1">
+                      <Checkbox
+                        checked={selectedIds.has(p.id)}
+                        onCheckedChange={() => togglePoint(p.id)}
+                        className="h-3 w-3"
+                      />
                       {p.iconUrl && <img src={p.iconUrl} className="w-4 h-4 rounded-sm object-cover" alt="" />}
                       <span className="flex-1 truncate">{p.name}</span>
                       <span className="text-muted-foreground text-[10px]">({p.x},{p.y})</span>
@@ -267,7 +336,6 @@ export function MatrixSidebar({
                   onChange={e => onUpdateZone(z.id, { color: e.target.value + '80' })}
                   className="h-6 w-full" />
                 
-                {/* Zone image */}
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1"
                     onClick={() => { setZoneImageUploadId(z.id); zoneImageRef.current?.click(); }}>

@@ -23,6 +23,63 @@ export const PRESETS: MatrixPreset[] = [
     points: [],
   },
   {
+    id: 'effort-impact',
+    name: 'Effort vs Impact',
+    config: {
+      title: 'Effort vs Impact Matrix',
+      xAxisLabel: 'Effort',
+      yAxisLabel: 'Impact',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: false,
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+    },
+    zones: [
+      { id: 'quickwins', name: 'Quick Wins', color: 'hsla(120, 70%, 55%, 0.5)', x1: 0, y1: 5, x2: 5, y2: 10 },
+      { id: 'major', name: 'Major Projects', color: 'hsla(210, 70%, 55%, 0.5)', x1: 5, y1: 5, x2: 10, y2: 10 },
+      { id: 'fillins', name: 'Fill-Ins', color: 'hsla(45, 70%, 60%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 5 },
+      { id: 'thankless', name: 'Thankless Tasks', color: 'hsla(0, 60%, 55%, 0.5)', x1: 5, y1: 0, x2: 10, y2: 5 },
+    ],
+    points: [],
+  },
+  {
+    id: 'risk-reward',
+    name: 'Risk vs Reward',
+    config: {
+      title: 'Risk vs Reward Matrix',
+      xAxisLabel: 'Risk',
+      yAxisLabel: 'Reward',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: true,
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+    },
+    zones: [
+      { id: 'safebets', name: 'Safe Bets', color: 'hsla(120, 65%, 50%, 0.5)', x1: 0, y1: 5, x2: 5, y2: 10 },
+      { id: 'moonshots', name: 'Moonshots', color: 'hsla(270, 60%, 60%, 0.5)', x1: 5, y1: 5, x2: 10, y2: 10 },
+      { id: 'lowkey', name: 'Low Priority', color: 'hsla(45, 50%, 65%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 5 },
+      { id: 'moneypits', name: 'Money Pits', color: 'hsla(0, 70%, 50%, 0.5)', x1: 5, y1: 0, x2: 10, y2: 5 },
+    ],
+    points: [],
+  },
+  {
+    id: 'skill-will',
+    name: 'Skill vs Will',
+    config: {
+      title: 'Skill vs Will Matrix',
+      xAxisLabel: 'Skill',
+      yAxisLabel: 'Will',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: false,
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+    },
+    zones: [
+      { id: 'stars', name: 'Stars', color: 'hsla(45, 90%, 55%, 0.5)', x1: 5, y1: 5, x2: 10, y2: 10 },
+      { id: 'highpotential', name: 'High Potentials', color: 'hsla(200, 70%, 55%, 0.5)', x1: 0, y1: 5, x2: 5, y2: 10 },
+      { id: 'workhorses', name: 'Workhorses', color: 'hsla(150, 55%, 50%, 0.5)', x1: 5, y1: 0, x2: 10, y2: 5 },
+      { id: 'problem', name: 'Problem Children', color: 'hsla(0, 65%, 55%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 5 },
+    ],
+    points: [],
+  },
+  {
     id: 'blank',
     name: 'Blank Template',
     config: {
