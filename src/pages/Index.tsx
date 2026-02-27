@@ -5,7 +5,7 @@ import { MatrixSidebar } from '@/components/MatrixSidebar';
 import { MatrixToolbar } from '@/components/MatrixToolbar';
 import { COLOR_SCHEMES } from '@/lib/presets';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, Flag } from 'lucide-react';
 
 const Index = () => {
   const {
@@ -21,6 +21,10 @@ const Index = () => {
 
   const handlePointMove = (id: string, x: number, y: number) => {
     updatePoint(id, { x, y });
+  };
+
+  const handlePointsMove = (moves: Array<{ id: string; x: number; y: number }>) => {
+    moves.forEach(({ id, x, y }) => updatePoint(id, { x, y }));
   };
 
   const handlePointClick = (id: string) => {
@@ -41,6 +45,11 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen bg-background">
+      {/* App Header */}
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card">
+        <Flag className="w-5 h-5 text-destructive" />
+        <h1 className="text-lg font-bold text-foreground tracking-tight">RedFlag Grapher</h1>
+      </div>
       <MatrixToolbar
         onLoadPreset={loadPreset}
         background={state.background}
@@ -86,6 +95,7 @@ const Index = () => {
               points={state.points}
               background={state.background}
               onPointMove={handlePointMove}
+              onPointsMove={handlePointsMove}
               onPointClick={handlePointClick}
               searchTerm={searchTerm}
               canvasRef={canvasRef as React.RefObject<HTMLDivElement>}
