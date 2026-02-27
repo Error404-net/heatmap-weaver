@@ -1,49 +1,26 @@
 
 
-## Interactive Custom Matrix Builder
+## Plan: Flexible CSV Import + Sample CSV Download
 
-### Core Matrix Canvas
-- Interactive 10x10 grid with customizable X and Y axis labels (e.g., "Hot" / "Crazy", or anything the user wants)
-- Diagonal "threshold line" that can be toggled on/off
-- Draggable data point labels on the canvas
-- Zoom and pan support for crowded matrices
-- Click on a data point to edit its name or coordinates inline
+### Problem
+The CSV parser currently requires exact columns `name, x, y` — but real-world CSVs (like the uploaded browser matrix) use arbitrary column names like `Browser, Hot_X, Crazy_Y`. Users need a way to map any CSV columns to X/Y/name fields.
 
-### Zone System
-- Default zones: No-Go, Fun, Danger, Date, Wife/Marriage, Unicorn (matching the classic layout)
-- Fully editable zone names, colors, and boundaries
-- Add/remove zones with a simple UI
-- 3 built-in presets: Classic Hot-Crazy, Enterprise Browser, and a blank template
+### Changes
 
-### CSV Data Import
-- Upload CSV with columns: name, x, y (and optional fields like category, notes)
-- Preview table of imported data before placing on matrix
-- Validation with error highlighting for out-of-range values
-- Manual "Add Point" button for one-off entries
-- Edit/delete points from a sidebar data table
+**1. Smart CSV parser with column auto-detection** (`src/lib/csvUtils.ts`)
+- Instead of requiring exact `name,x,y` headers, auto-detect numeric columns and name-like columns
+- Add heuristic matching: look for columns containing "x", "hot", "score" for X axis; "y", "crazy" for Y axis; first non-numeric text column as name
+- If auto-detection fails or is ambiguous, still import but use first text col as name, first two numeric cols as x,y
+- Map `category` from any column named "category", "type", "group", "engine", etc.
+- Map `notes` from columns like "notes", "description", "placement", etc.
 
-### Background Customization
-- 4-5 color scheme presets (Classic, Dark Mode, Pastel, Neon, Monochrome) that style all zones
-- Custom color picker for individual zone colors
-- Upload a custom background image with opacity slider so the grid remains visible
+**2. Add "Download Sample CSV" button** (`src/components/MatrixSidebar.tsx`)
+- Add a button next to "Import CSV" that downloads a small sample CSV showing the expected format
+- Sample contains 3-4 example rows with `name,x,y,category,notes` columns
 
-### Export
-- **PNG**: High-res raster image download
-- **SVG**: Scalable vector export
-- **PDF**: Print-ready document export
-- **CSV**: Re-export current data points for re-import later
+**3. Add sample CSV export with template** (`src/components/MatrixToolbar.tsx`)
+- Add a "Download Template" option in the export dropdown menu
 
-### Additional Features
-- **Undo/Redo** for drag operations and edits
-- **Tooltip on hover** showing point name and exact coordinates
-- **Search/filter** to highlight specific points on a crowded matrix
-- **Dark mode toggle** for the whole app UI
-- **Share link** that encodes the current state in a URL (no backend needed, uses URL hash)
-- **Responsive layout** with sidebar for controls, main area for the canvas
-
-### Layout
-- Left sidebar: Data table, CSV upload, add point form, zone editor
-- Center: Interactive matrix canvas
-- Top toolbar: Presets, background settings, export buttons, undo/redo
-- All data stays in-browser (localStorage optional for session persistence)
+**4. Copy uploaded CSV to project** as a bundled sample dataset for the Enterprise Browser preset (`src/lib/presets.ts`)
+- Update the Enterprise Browser preset to include actual browser data points from the CSV
 
