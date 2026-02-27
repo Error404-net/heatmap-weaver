@@ -276,17 +276,28 @@ export function MatrixSidebar({
                   {z.imageUrl && (
                     <>
                       <div className="flex-1">
+                        <Label className="text-[10px] text-muted-foreground">Opacity</Label>
                         <Slider
                           value={[(z.imageOpacity ?? 0.3) * 100]}
                           onValueChange={([v]) => onUpdateZone(z.id, { imageOpacity: v / 100 })}
                           max={100} min={0} step={5} className="w-full"
                         />
                       </div>
-                      <button onClick={() => onUpdateZone(z.id, { imageUrl: undefined, imageOpacity: undefined })}
+                      <button onClick={() => onUpdateZone(z.id, { imageUrl: undefined, imageOpacity: undefined, imageScale: undefined })}
                         className="text-muted-foreground"><X className="w-3 h-3" /></button>
                     </>
                   )}
                 </div>
+                {z.imageUrl && (
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Size</Label>
+                    <Slider
+                      value={[(z.imageScale ?? 1.0) * 100]}
+                      onValueChange={([v]) => onUpdateZone(z.id, { imageScale: v / 100 })}
+                      max={300} min={10} step={5} className="w-full"
+                    />
+                  </div>
+                )}
               </div>
             ))}
             <Button variant="outline" size="sm" className="w-full h-8 text-xs"

@@ -18,6 +18,7 @@ export interface Zone {
   y2: number;
   imageUrl?: string;
   imageOpacity?: number;
+  imageScale?: number;
 }
 
 export interface MatrixConfig {

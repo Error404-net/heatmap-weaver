@@ -9,17 +9,22 @@ const PLACEMENT_HINTS = ['placement', 'suggested', 'quadrant', 'zone', 'position
 
 // Keyword → approximate coordinate ranges for hot-crazy style matrix (0-10)
 const PLACEMENT_MAP: Record<string, { xRange: [number, number]; yRange: [number, number] }> = {
-  'marry':   { xRange: [8, 10], yRange: [3, 5] },
-  'wife':    { xRange: [8, 10], yRange: [3, 5] },
-  'unicorn': { xRange: [8, 10], yRange: [8, 10] },
-  'date':    { xRange: [8, 10], yRange: [5, 8] },
-  'hot':     { xRange: [5, 8], yRange: [4, 7] },
-  'fun':     { xRange: [5, 8], yRange: [4, 7] },
-  'danger':  { xRange: [5, 8], yRange: [7, 10] },
-  'crazy':   { xRange: [3, 6], yRange: [6, 9] },
-  'nogo':    { xRange: [0, 5], yRange: [4, 10] },
-  'no-go':   { xRange: [0, 5], yRange: [4, 10] },
-  'no go':   { xRange: [0, 5], yRange: [4, 10] },
+  'marry':      { xRange: [7, 10], yRange: [2, 5] },
+  'wife':       { xRange: [7, 10], yRange: [2, 5] },
+  'unicorn':    { xRange: [7, 10], yRange: [7, 10] },
+  'date':       { xRange: [7, 10], yRange: [5, 8] },
+  'date zone':  { xRange: [7, 10], yRange: [5, 8] },
+  'hot':        { xRange: [5, 8], yRange: [3, 7] },
+  'fun':        { xRange: [5, 8], yRange: [4, 7] },
+  'fun zone':   { xRange: [5, 8], yRange: [4, 7] },
+  'danger':     { xRange: [5, 8], yRange: [7, 10] },
+  'danger zone':{ xRange: [5, 8], yRange: [7, 10] },
+  'crazy':      { xRange: [3, 6], yRange: [6, 9] },
+  'nogo':       { xRange: [0, 5], yRange: [4, 10] },
+  'no-go':      { xRange: [0, 5], yRange: [4, 10] },
+  'no go':      { xRange: [0, 5], yRange: [4, 10] },
+  'no-go zone': { xRange: [0, 5], yRange: [4, 10] },
+  'unicorn zone': { xRange: [7, 10], yRange: [7, 10] },
 };
 
 function jitter(min: number, max: number): number {

@@ -121,18 +121,27 @@ export function MatrixCanvas({
               strokeWidth={1}
             />
             {/* Zone image */}
-            {zone.imageUrl && (
-              <image
-                href={zone.imageUrl}
-                x={toCanvasX(zone.x1)}
-                y={toCanvasY(zone.y2)}
-                width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
-                height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
-                opacity={zone.imageOpacity ?? 0.3}
-                preserveAspectRatio="xMidYMid slice"
-                clipPath={`url(#zone-clip-${zone.id})`}
-              />
-            )}
+            {zone.imageUrl && (() => {
+              const zw = toCanvasX(zone.x2) - toCanvasX(zone.x1);
+              const zh = toCanvasY(zone.y1) - toCanvasY(zone.y2);
+              const scale = zone.imageScale ?? 1.0;
+              const sw = zw * scale;
+              const sh = zh * scale;
+              const cx = toCanvasX(zone.x1) + zw / 2;
+              const cy = toCanvasY(zone.y2) + zh / 2;
+              return (
+                <image
+                  href={zone.imageUrl}
+                  x={cx - sw / 2}
+                  y={cy - sh / 2}
+                  width={sw}
+                  height={sh}
+                  opacity={zone.imageOpacity ?? 0.3}
+                  preserveAspectRatio="xMidYMid slice"
+                  clipPath={`url(#zone-clip-${zone.id})`}
+                />
+              );
+            })()}
           </g>
         ))}
 
