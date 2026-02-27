@@ -292,7 +292,8 @@ export function MatrixCanvas({
               <text x={cx + (p.iconUrl ? iconSize / 2 + 3 : 8)} y={cy + 4} fontSize={10} fill="hsl(var(--foreground))"
                 className="pointer-events-none">{p.name}</text>
             </g>
-          );
+           );
+        })}
         {placementMode && (
           <g className="pointer-events-none">
             <rect x={PADDING} y={PADDING} width={CANVAS_SIZE} height={CANVAS_SIZE}

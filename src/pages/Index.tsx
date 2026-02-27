@@ -66,6 +66,19 @@ const Index = () => {
     batchUpdatePoints(updates);
   };
 
+  const handlePlaceInZone = (zoneId: string) => {
+    if (selectedIds.size === 0) return;
+    const zone = state.zones.find(z => z.id === zoneId);
+    if (!zone) return;
+    const ids = Array.from(selectedIds);
+    const updates = ids.map(id => {
+      const x = Math.round((zone.x1 + Math.random() * (zone.x2 - zone.x1)) * 100) / 100;
+      const y = Math.round((zone.y1 + Math.random() * (zone.y2 - zone.y1)) * 100) / 100;
+      return { id, partial: { x, y } };
+    });
+    batchUpdatePoints(updates);
+  };
+
   const applyColorScheme = (scheme: string) => {
     const colors = COLOR_SCHEMES[scheme];
     if (!colors) return;
@@ -113,7 +126,8 @@ const Index = () => {
           onSelectedIdsChange={setSelectedIds}
           onDeleteSelected={handleDeleteSelected}
           onEnterPlaceMode={() => setPlacementMode(true)}
-          onDistributeSelected={handleDistributeSelected}
+           onDistributeSelected={handleDistributeSelected}
+          onPlaceInZone={handlePlaceInZone}
         />
         <div className="flex-1 flex flex-col overflow-auto">
           <div className="p-2 flex items-center gap-2">

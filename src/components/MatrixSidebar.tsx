@@ -6,7 +6,8 @@ import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus, MousePointerClick, Shuffle, CheckSquare } from 'lucide-react';
+import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus, MousePointerClick, Shuffle, CheckSquare, MapPin } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataPoint, Zone, MatrixConfig } from '@/types/matrix';
 import { parseCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { distributePoints } from '@/lib/distributePoints';
@@ -29,13 +30,14 @@ interface MatrixSidebarProps {
   onDeleteSelected: () => void;
   onEnterPlaceMode: () => void;
   onDistributeSelected: () => void;
+  onPlaceInZone: (zoneId: string) => void;
 }
 
 export function MatrixSidebar({
   config, points, zones,
   onUpdateConfig, onAddPoint, onUpdatePoint, onDeletePoint, onSetPoints,
   onAddZone, onUpdateZone, onDeleteZone,
-  selectedIds, onSelectedIdsChange, onDeleteSelected, onEnterPlaceMode, onDistributeSelected,
+  selectedIds, onSelectedIdsChange, onDeleteSelected, onEnterPlaceMode, onDistributeSelected, onPlaceInZone,
 }: MatrixSidebarProps) {
   const [newName, setNewName] = useState('');
   const [newX, setNewX] = useState('');
@@ -239,7 +241,7 @@ export function MatrixSidebar({
               {selectedIds.size > 0 && (
                 <div className="p-2 rounded border border-border bg-muted/50 space-y-2">
                   <Label className="text-[10px] font-semibold text-muted-foreground">{selectedIds.size} selected</Label>
-                  <div className="flex gap-1">
+                   <div className="flex gap-1">
                     <Button size="sm" variant="outline" className="flex-1 h-6 text-[10px]" onClick={onEnterPlaceMode}>
                       <MousePointerClick className="w-3 h-3 mr-1" /> Place on Chart
                     </Button>
@@ -247,6 +249,24 @@ export function MatrixSidebar({
                       <Shuffle className="w-3 h-3 mr-1" /> Distribute
                     </Button>
                   </div>
+                  {zones.length > 0 && (
+                    <Select onValueChange={(zoneId) => onPlaceInZone(zoneId)}>
+                      <SelectTrigger className="h-6 text-[10px]">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        <SelectValue placeholder="Place in Zone..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {zones.map(z => (
+                          <SelectItem key={z.id} value={z.id} className="text-xs">
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 rounded-sm" style={{ background: z.color }} />
+                              {z.name}
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <Button size="sm" variant="destructive" className="w-full h-6 text-[10px]" onClick={onDeleteSelected}>
                     <Trash2 className="w-3 h-3 mr-1" /> Delete Selected
                   </Button>
