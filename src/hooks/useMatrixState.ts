@@ -108,10 +108,27 @@ export function useMatrixState() {
     }));
   }, [pushHistory]);
 
+  const batchUpdatePoints = useCallback((updates: Array<{ id: string; partial: Partial<DataPoint> }>) => {
+    pushHistory();
+    setState(s => ({
+      ...s,
+      points: s.points.map(p => {
+        const u = updates.find(u => u.id === p.id);
+        return u ? { ...p, ...u.partial } : p;
+      }),
+    }));
+  }, [pushHistory]);
+
+  const deletePoints = useCallback((ids: string[]) => {
+    pushHistory();
+    const idSet = new Set(ids);
+    setState(s => ({ ...s, points: s.points.filter(p => !idSet.has(p.id)) }));
+  }, [pushHistory]);
+
   return {
     state,
     updateConfig,
-    addPoint, updatePoint, deletePoint, setPoints,
+    addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints,
     addZone, updateZone, deleteZone,
     updateBackground,
     loadPreset,
