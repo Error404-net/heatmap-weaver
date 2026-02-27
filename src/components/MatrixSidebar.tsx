@@ -5,9 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Upload, Edit2, X, Check } from 'lucide-react';
+import { Trash2, Plus, Upload, Edit2, X, Check, FileDown } from 'lucide-react';
 import { DataPoint, Zone, MatrixConfig } from '@/types/matrix';
-import { parseCSV } from '@/lib/csvUtils';
+import { parseCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { toast } from 'sonner';
 
 interface MatrixSidebarProps {
@@ -134,9 +134,14 @@ export function MatrixSidebar({
             {/* CSV upload */}
             <div>
               <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
-              <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={() => fileRef.current?.click()}>
-                <Upload className="w-3 h-3 mr-1" /> Import CSV
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => fileRef.current?.click()}>
+                  <Upload className="w-3 h-3 mr-1" /> Import CSV
+                </Button>
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={downloadSampleCSV} title="Download sample CSV template">
+                  <FileDown className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
 
             <Separator />

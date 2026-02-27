@@ -8,7 +8,7 @@ import { Undo2, Redo2, Download, Image, Share2 } from 'lucide-react';
 import { PRESETS, COLOR_SCHEMES } from '@/lib/presets';
 import { BackgroundConfig } from '@/types/matrix';
 import { exportPNG, exportSVG, exportPDF } from '@/lib/exportUtils';
-import { pointsToCSV } from '@/lib/csvUtils';
+import { pointsToCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { DataPoint } from '@/types/matrix';
 import { toast } from 'sonner';
 import {
@@ -125,6 +125,7 @@ export function MatrixToolbar({
           <DropdownMenuItem className="text-xs" onClick={() => canvasRef.current && exportSVG(canvasRef.current)}>SVG</DropdownMenuItem>
           <DropdownMenuItem className="text-xs" onClick={() => canvasRef.current && exportPDF(canvasRef.current)}>PDF</DropdownMenuItem>
           <DropdownMenuItem className="text-xs" onClick={handleExportCSV}>CSV (data)</DropdownMenuItem>
+          <DropdownMenuItem className="text-xs" onClick={downloadSampleCSV}>CSV Template</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
