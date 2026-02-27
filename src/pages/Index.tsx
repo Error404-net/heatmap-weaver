@@ -5,7 +5,9 @@ import { MatrixSidebar } from '@/components/MatrixSidebar';
 import { MatrixToolbar } from '@/components/MatrixToolbar';
 import { COLOR_SCHEMES } from '@/lib/presets';
 import { Input } from '@/components/ui/input';
-import { Search, Flag } from 'lucide-react';
+import { Search, Flame, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
+import { Button } from '@/components/ui/button';
 import { distributePoints } from '@/lib/distributePoints';
 
 const Index = () => {
@@ -21,6 +23,7 @@ const Index = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [placementMode, setPlacementMode] = useState(false);
+  const [sidebarVisible, setSidebarVisible] = useState(true);
 
   const handlePointMove = (id: string, x: number, y: number) => {
     updatePoint(id, { x, y });
@@ -94,8 +97,14 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card">
-        <Flag className="w-5 h-5 text-destructive" />
-        <h1 className="text-lg font-bold text-foreground tracking-tight">RedFlag Grapher</h1>
+        <Flame className="w-5 h-5 text-destructive" />
+        <h1 className="text-lg font-bold text-foreground tracking-tight">CHMatrix</h1>
+        <span className="text-xs text-muted-foreground">Crazy Hot Matrix</span>
+        <div className="ml-auto">
+          <Button variant="ghost" size="icon" onClick={() => setSidebarVisible(v => !v)} title={sidebarVisible ? 'Hide menu' : 'Show menu'}>
+            {sidebarVisible ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+          </Button>
+        </div>
       </div>
       <MatrixToolbar
         onLoadPreset={loadPreset}
@@ -109,54 +118,65 @@ const Index = () => {
         points={state.points}
         onApplyColorScheme={applyColorScheme}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <MatrixSidebar
-          config={state.config}
-          points={state.points}
-          zones={state.zones}
-          onUpdateConfig={updateConfig}
-          onAddPoint={addPoint}
-          onUpdatePoint={updatePoint}
-          onDeletePoint={deletePoint}
-          onSetPoints={setPoints}
-          onAddZone={addZone}
-          onUpdateZone={updateZone}
-          onDeleteZone={deleteZone}
-          selectedIds={selectedIds}
-          onSelectedIdsChange={setSelectedIds}
-          onDeleteSelected={handleDeleteSelected}
-          onEnterPlaceMode={() => setPlacementMode(true)}
-           onDistributeSelected={handleDistributeSelected}
-          onPlaceInZone={handlePlaceInZone}
-        />
-        <div className="flex-1 flex flex-col overflow-auto">
-          <div className="p-2 flex items-center gap-2">
-            <Search className="w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search points..."
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-              className="h-8 text-xs max-w-xs"
-            />
-          </div>
-          <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
-            <MatrixCanvas
-              config={state.config}
-              zones={state.zones}
-              points={state.points}
-              background={state.background}
-              onPointMove={handlePointMove}
-              onPointsMove={handlePointsMove}
-              onPointClick={handlePointClick}
-              searchTerm={searchTerm}
-              canvasRef={canvasRef as React.RefObject<HTMLDivElement>}
-              selectedIds={selectedIds}
-              onSelectedIdsChange={setSelectedIds}
-              placementMode={placementMode}
-              onPlaceAt={handlePlaceAt}
-            />
-          </div>
-        </div>
+      <div className="flex-1 overflow-hidden">
+        <ResizablePanelGroup direction="horizontal">
+          {sidebarVisible && (
+            <>
+              <ResizablePanel defaultSize={22} minSize={15} maxSize={40}>
+                <MatrixSidebar
+                  config={state.config}
+                  points={state.points}
+                  zones={state.zones}
+                  onUpdateConfig={updateConfig}
+                  onAddPoint={addPoint}
+                  onUpdatePoint={updatePoint}
+                  onDeletePoint={deletePoint}
+                  onSetPoints={setPoints}
+                  onAddZone={addZone}
+                  onUpdateZone={updateZone}
+                  onDeleteZone={deleteZone}
+                  selectedIds={selectedIds}
+                  onSelectedIdsChange={setSelectedIds}
+                  onDeleteSelected={handleDeleteSelected}
+                  onEnterPlaceMode={() => setPlacementMode(true)}
+                  onDistributeSelected={handleDistributeSelected}
+                  onPlaceInZone={handlePlaceInZone}
+                />
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+            </>
+          )}
+          <ResizablePanel defaultSize={78}>
+            <div className="flex flex-col h-full overflow-auto">
+              <div className="p-2 flex items-center gap-2">
+                <Search className="w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search points..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                  className="h-8 text-xs max-w-xs"
+                />
+              </div>
+              <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+                <MatrixCanvas
+                  config={state.config}
+                  zones={state.zones}
+                  points={state.points}
+                  background={state.background}
+                  onPointMove={handlePointMove}
+                  onPointsMove={handlePointsMove}
+                  onPointClick={handlePointClick}
+                  searchTerm={searchTerm}
+                  canvasRef={canvasRef as React.RefObject<HTMLDivElement>}
+                  selectedIds={selectedIds}
+                  onSelectedIdsChange={setSelectedIds}
+                  placementMode={placementMode}
+                  onPlaceAt={handlePlaceAt}
+                />
+              </div>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
     </div>
   );
