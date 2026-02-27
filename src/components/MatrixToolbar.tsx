@@ -1,10 +1,9 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Undo2, Redo2, Download, Image, Share2 } from 'lucide-react';
+import { Undo2, Redo2, Download, Image, Share2, Moon, Sun } from 'lucide-react';
 import { PRESETS, COLOR_SCHEMES } from '@/lib/presets';
 import { BackgroundConfig } from '@/types/matrix';
 import { exportPNG, exportSVG, exportPDF } from '@/lib/exportUtils';
@@ -33,6 +32,17 @@ export function MatrixToolbar({
   onUndo, onRedo, canUndo, canRedo, canvasRef, points, onApplyColorScheme,
 }: MatrixToolbarProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('matrix-dark-mode') === 'true';
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+    localStorage.setItem('matrix-dark-mode', String(darkMode));
+  }, [darkMode]);
 
   const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,6 +114,12 @@ export function MatrixToolbar({
       )}
 
       <div className="flex-1" />
+
+      {/* Dark mode toggle */}
+      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDarkMode(!darkMode)}
+        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+        {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      </Button>
 
       {/* Undo/Redo */}
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onUndo} disabled={!canUndo}>

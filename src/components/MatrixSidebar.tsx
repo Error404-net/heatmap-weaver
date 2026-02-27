@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Trash2, Plus, Upload, Edit2, X, Check, FileDown } from 'lucide-react';
+import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus } from 'lucide-react';
 import { DataPoint, Zone, MatrixConfig } from '@/types/matrix';
 import { parseCSV, downloadSampleCSV } from '@/lib/csvUtils';
+import { distributePoints } from '@/lib/distributePoints';
 import { toast } from 'sonner';
 
 interface MatrixSidebarProps {
@@ -34,7 +35,14 @@ export function MatrixSidebar({
   const [newY, setNewY] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editX, setEditX] = useState('');
+  const [editY, setEditY] = useState('');
+  const [editCategory, setEditCategory] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+  const iconRef = useRef<HTMLInputElement>(null);
+  const zoneImageRef = useRef<HTMLInputElement>(null);
+  const [iconUploadId, setIconUploadId] = useState<string | null>(null);
+  const [zoneImageUploadId, setZoneImageUploadId] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<'config' | 'points' | 'zones'>('points');
 
   const handleAddPoint = () => {
@@ -55,7 +63,7 @@ export function MatrixSidebar({
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
       const { points: parsed, errors } = parseCSV(text);
-      if (errors.length > 0) toast.error(errors.join(', '));
+      if (errors.length > 0) toast.error(errors.slice(0, 3).join(', '));
       if (parsed.length > 0) {
         onSetPoints([...points, ...parsed]);
         toast.success(`Imported ${parsed.length} points`);
@@ -65,18 +73,65 @@ export function MatrixSidebar({
     e.target.value = '';
   };
 
+  const handleDistribute = () => {
+    if (points.length === 0) { toast.error('No points to distribute'); return; }
+    const distributed = distributePoints(points, config);
+    onSetPoints(distributed);
+    toast.success(`Distributed ${distributed.length} points`);
+  };
+
   const startEdit = (p: DataPoint) => {
     setEditingId(p.id);
     setEditName(p.name);
+    setEditX(String(p.x));
+    setEditY(String(p.y));
+    setEditCategory(p.category || '');
   };
 
   const saveEdit = (id: string) => {
-    onUpdatePoint(id, { name: editName });
+    const x = parseFloat(editX);
+    const y = parseFloat(editY);
+    onUpdatePoint(id, {
+      name: editName,
+      x: isNaN(x) ? 0 : x,
+      y: isNaN(y) ? 0 : y,
+      category: editCategory || undefined,
+    });
     setEditingId(null);
+  };
+
+  const handleIconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !iconUploadId) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onUpdatePoint(iconUploadId, { iconUrl: ev.target?.result as string });
+      toast.success('Icon uploaded');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+    setIconUploadId(null);
+  };
+
+  const handleZoneImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !zoneImageUploadId) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      onUpdateZone(zoneImageUploadId, { imageUrl: ev.target?.result as string, imageOpacity: 0.3 });
+      toast.success('Zone image uploaded');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+    setZoneImageUploadId(null);
   };
 
   return (
     <div className="w-72 border-r border-border bg-card flex flex-col h-full">
+      {/* Hidden file inputs */}
+      <input ref={iconRef} type="file" accept="image/*" className="hidden" onChange={handleIconUpload} />
+      <input ref={zoneImageRef} type="file" accept="image/*" className="hidden" onChange={handleZoneImageUpload} />
+
       {/* Section tabs */}
       <div className="flex border-b border-border">
         {(['config', 'points', 'zones'] as const).map(s => (
@@ -131,8 +186,8 @@ export function MatrixSidebar({
 
             <Separator />
 
-            {/* CSV upload */}
-            <div>
+            {/* CSV upload + Distribute */}
+            <div className="space-y-2">
               <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSVUpload} />
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" onClick={() => fileRef.current?.click()}>
@@ -142,6 +197,9 @@ export function MatrixSidebar({
                   <FileDown className="w-3 h-3" />
                 </Button>
               </div>
+              <Button variant="outline" size="sm" className="w-full h-8 text-xs" onClick={handleDistribute}>
+                <Grid3X3 className="w-3 h-3 mr-1" /> Distribute Points
+              </Button>
             </div>
 
             <Separator />
@@ -150,21 +208,36 @@ export function MatrixSidebar({
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Points ({points.length})</Label>
               {points.map(p => (
-                <div key={p.id} className="flex items-center gap-1 py-1 px-1 rounded hover:bg-muted text-xs group">
+                <div key={p.id} className="py-1 px-1 rounded hover:bg-muted text-xs group">
                   {editingId === p.id ? (
-                    <>
+                    <div className="space-y-1">
                       <Input value={editName} onChange={e => setEditName(e.target.value)}
-                        className="h-6 text-xs flex-1" />
-                      <button onClick={() => saveEdit(p.id)} className="text-primary"><Check className="w-3 h-3" /></button>
-                      <button onClick={() => setEditingId(null)} className="text-muted-foreground"><X className="w-3 h-3" /></button>
-                    </>
+                        placeholder="Name" className="h-6 text-xs" />
+                      <div className="grid grid-cols-2 gap-1">
+                        <Input value={editX} onChange={e => setEditX(e.target.value)}
+                          placeholder="X" type="number" className="h-6 text-xs" />
+                        <Input value={editY} onChange={e => setEditY(e.target.value)}
+                          placeholder="Y" type="number" className="h-6 text-xs" />
+                      </div>
+                      <Input value={editCategory} onChange={e => setEditCategory(e.target.value)}
+                        placeholder="Category" className="h-6 text-xs" />
+                      <div className="flex gap-1">
+                        <button onClick={() => saveEdit(p.id)} className="text-primary"><Check className="w-3 h-3" /></button>
+                        <button onClick={() => setEditingId(null)} className="text-muted-foreground"><X className="w-3 h-3" /></button>
+                      </div>
+                    </div>
                   ) : (
-                    <>
+                    <div className="flex items-center gap-1">
+                      {p.iconUrl && <img src={p.iconUrl} className="w-4 h-4 rounded-sm object-cover" alt="" />}
                       <span className="flex-1 truncate">{p.name}</span>
                       <span className="text-muted-foreground text-[10px]">({p.x},{p.y})</span>
+                      <button onClick={() => { setIconUploadId(p.id); iconRef.current?.click(); }}
+                        className="opacity-0 group-hover:opacity-100" title="Upload icon">
+                        <ImagePlus className="w-3 h-3" />
+                      </button>
                       <button onClick={() => startEdit(p)} className="opacity-0 group-hover:opacity-100"><Edit2 className="w-3 h-3" /></button>
                       <button onClick={() => onDeletePoint(p.id)} className="opacity-0 group-hover:opacity-100 text-destructive"><Trash2 className="w-3 h-3" /></button>
-                    </>
+                    </div>
                   )}
                 </div>
               ))}
@@ -193,6 +266,27 @@ export function MatrixSidebar({
                 <Input type="color" value={z.color.startsWith('hsla') ? '#888888' : z.color}
                   onChange={e => onUpdateZone(z.id, { color: e.target.value + '80' })}
                   className="h-6 w-full" />
+                
+                {/* Zone image */}
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="h-6 text-[10px] px-1"
+                    onClick={() => { setZoneImageUploadId(z.id); zoneImageRef.current?.click(); }}>
+                    <ImagePlus className="w-3 h-3 mr-1" /> Image
+                  </Button>
+                  {z.imageUrl && (
+                    <>
+                      <div className="flex-1">
+                        <Slider
+                          value={[(z.imageOpacity ?? 0.3) * 100]}
+                          onValueChange={([v]) => onUpdateZone(z.id, { imageOpacity: v / 100 })}
+                          max={100} min={0} step={5} className="w-full"
+                        />
+                      </div>
+                      <button onClick={() => onUpdateZone(z.id, { imageUrl: undefined, imageOpacity: undefined })}
+                        className="text-muted-foreground"><X className="w-3 h-3" /></button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
             <Button variant="outline" size="sm" className="w-full h-8 text-xs"
