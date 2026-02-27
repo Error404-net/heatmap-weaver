@@ -28,7 +28,10 @@ const PLACEMENT_MAP: Record<string, { xRange: [number, number]; yRange: [number,
 };
 
 function jitter(min: number, max: number): number {
-  return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+  const raw = min + Math.random() * (max - min);
+  // Clamp to stay within visible chart area (0.3 to 9.7 for 0-10 range)
+  const clamped = Math.max(0.3, Math.min(9.7, raw));
+  return Math.round(clamped * 100) / 100;
 }
 
 function parsePlacement(text: string): { x: number; y: number } | null {

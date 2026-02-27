@@ -7,6 +7,7 @@ interface MatrixCanvasProps {
   points: DataPoint[];
   background: BackgroundConfig;
   onPointMove: (id: string, x: number, y: number) => void;
+  onPointsMove: (moves: Array<{ id: string; x: number; y: number }>) => void;
   onPointClick: (id: string) => void;
   searchTerm: string;
   canvasRef: React.RefObject<HTMLDivElement>;
@@ -16,9 +17,11 @@ const PADDING = 60;
 const CANVAS_SIZE = 600;
 
 export function MatrixCanvas({
-  config, zones, points, background, onPointMove, onPointClick, searchTerm, canvasRef,
+  config, zones, points, background, onPointMove, onPointsMove, onPointClick, searchTerm, canvasRef,
 }: MatrixCanvasProps) {
   const [dragging, setDragging] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [dragStart, setDragStart] = useState<{ cx: number; cy: number } | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
   const { xMin, xMax, yMin, yMax } = config;
@@ -30,18 +33,70 @@ export function MatrixCanvas({
   const fromCanvasX = (cx: number) => xMin + ((cx - PADDING) / CANVAS_SIZE) * rangeX;
   const fromCanvasY = (cy: number) => yMax - ((cy - PADDING) / CANVAS_SIZE) * rangeY;
 
+  const clampX = (x: number) => Math.max(xMin + 0.1, Math.min(xMax - 0.1, x));
+  const clampY = (y: number) => Math.max(yMin + 0.1, Math.min(yMax - 0.1, y));
+
   const totalW = CANVAS_SIZE + PADDING * 2;
   const totalH = CANVAS_SIZE + PADDING * 2;
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragging || !svgRef.current) return;
+    if (!dragging || !svgRef.current || !dragStart) return;
     const rect = svgRef.current.getBoundingClientRect();
     const cx = e.clientX - rect.left;
     const cy = e.clientY - rect.top;
-    const x = Math.round(fromCanvasX(cx) * 100) / 100;
-    const y = Math.round(fromCanvasY(cy) * 100) / 100;
-    onPointMove(dragging, Math.max(xMin, Math.min(xMax, x)), Math.max(yMin, Math.min(yMax, y)));
-  }, [dragging, fromCanvasX, fromCanvasY, onPointMove, xMin, xMax, yMin, yMax]);
+    const dx = cx - dragStart.cx;
+    const dy = cy - dragStart.cy;
+
+    // If dragging a selected point, move all selected points
+    if (selectedIds.has(dragging)) {
+      const moves = Array.from(selectedIds).map(id => {
+        const p = points.find(pt => pt.id === id);
+        if (!p) return null;
+        const newCx = toCanvasX(p.x) + dx;
+        const newCy = toCanvasY(p.y) + dy;
+        return {
+          id,
+          x: clampX(Math.round(fromCanvasX(newCx) * 100) / 100),
+          y: clampY(Math.round(fromCanvasY(newCy) * 100) / 100),
+        };
+      }).filter(Boolean) as Array<{ id: string; x: number; y: number }>;
+      onPointsMove(moves);
+    } else {
+      const x = clampX(Math.round(fromCanvasX(cx) * 100) / 100);
+      const y = clampY(Math.round(fromCanvasY(cy) * 100) / 100);
+      onPointMove(dragging, x, y);
+    }
+    setDragStart({ cx, cy });
+  }, [dragging, dragStart, selectedIds, points, fromCanvasX, fromCanvasY, toCanvasX, toCanvasY, onPointMove, onPointsMove, xMin, xMax, yMin, yMax]);
+
+  const handleMouseDown = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    
+    if (e.shiftKey) {
+      // Toggle selection
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    } else if (!selectedIds.has(id)) {
+      // Single select
+      setSelectedIds(new Set([id]));
+    }
+    
+    setDragging(id);
+    setDragStart({ cx: e.clientX - rect.left, cy: e.clientY - rect.top });
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent) => {
+    // Deselect all if clicking empty area
+    if ((e.target as Element) === svgRef.current || (e.target as Element).tagName === 'rect') {
+      setSelectedIds(new Set());
+    }
+  };
 
   const gridLines = [];
   for (let i = 0; i <= rangeX; i++) {
@@ -80,8 +135,9 @@ export function MatrixCanvas({
         height={totalH}
         className="select-none"
         onMouseMove={handleMouseMove}
-        onMouseUp={() => setDragging(null)}
-        onMouseLeave={() => setDragging(null)}
+        onMouseUp={() => { setDragging(null); setDragStart(null); }}
+        onMouseLeave={() => { setDragging(null); setDragStart(null); }}
+        onClick={handleCanvasClick}
       >
         {/* Background image */}
         {background.imageUrl && (
@@ -90,7 +146,7 @@ export function MatrixCanvas({
             x={PADDING} y={PADDING}
             width={CANVAS_SIZE} height={CANVAS_SIZE}
             opacity={background.imageOpacity}
-            preserveAspectRatio="xMidYMid slice"
+            preserveAspectRatio="xMinYMax slice"
           />
         )}
 
@@ -185,18 +241,24 @@ export function MatrixCanvas({
 
         {/* Data points */}
         {points.map(p => {
-          const cx = toCanvasX(p.x);
-          const cy = toCanvasY(p.y);
+          const cx = Math.max(PADDING, Math.min(PADDING + CANVAS_SIZE, toCanvasX(p.x)));
+          const cy = Math.max(PADDING, Math.min(PADDING + CANVAS_SIZE, toCanvasY(p.y)));
           const highlighted = isHighlighted(p);
           const dimmed = searchTerm && !highlighted;
+          const selected = selectedIds.has(p.id);
           const iconSize = highlighted ? 18 : 14;
           return (
             <g key={p.id}
-              onMouseDown={(e) => { e.preventDefault(); setDragging(p.id); }}
+              onMouseDown={(e) => handleMouseDown(e, p.id)}
               onClick={() => onPointClick(p.id)}
               className="cursor-grab active:cursor-grabbing"
               opacity={dimmed ? 0.2 : 1}
             >
+              {/* Selection ring */}
+              {selected && (
+                <circle cx={cx} cy={cy} r={p.iconUrl ? iconSize / 2 + 4 : 9}
+                  fill="none" stroke="hsl(45,100%,50%)" strokeWidth={2} strokeDasharray="3,2" />
+              )}
               {p.iconUrl ? (
                 <image
                   href={p.iconUrl}
@@ -209,7 +271,7 @@ export function MatrixCanvas({
               ) : (
                 <circle cx={cx} cy={cy} r={highlighted ? 7 : 5}
                   fill={highlighted ? 'hsl(45,100%,50%)' : 'hsl(220,80%,50%)'}
-                  stroke="hsl(0,0%,100%)" strokeWidth={1.5} />
+                  stroke={selected ? 'hsl(45,100%,50%)' : 'hsl(0,0%,100%)'} strokeWidth={selected ? 2 : 1.5} />
               )}
               <title>{`${p.name} (${p.x}, ${p.y})`}</title>
               <text x={cx + (p.iconUrl ? iconSize / 2 + 3 : 8)} y={cy + 4} fontSize={10} fill="hsl(var(--foreground))"

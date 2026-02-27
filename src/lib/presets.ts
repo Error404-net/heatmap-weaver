@@ -5,7 +5,7 @@ export const PRESETS: MatrixPreset[] = [
     id: 'hot-crazy',
     name: 'Classic Hot-Crazy',
     config: {
-      title: 'Universal Hot Crazy Matrix',
+      title: 'RedFlag Grapher',
       xAxisLabel: 'Hot Axis',
       yAxisLabel: 'Crazy Axis',
       xMin: 0, xMax: 10, yMin: 0, yMax: 10,
