@@ -1,6 +1,5 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { DataPoint, Zone, MatrixConfig, BackgroundConfig } from '@/types/matrix';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MatrixCanvasProps {
   config: MatrixConfig;
@@ -54,7 +53,7 @@ export function MatrixCanvas({
     );
     gridLines.push(
       <text key={`vl-${i}`} x={cx} y={PADDING + CANVAS_SIZE + 18} textAnchor="middle"
-        fontSize={11} fill="hsl(0,0%,40%)">{v}</text>
+        fontSize={11} fill="hsl(var(--foreground))">{v}</text>
     );
   }
   for (let i = 0; i <= rangeY; i++) {
@@ -66,7 +65,7 @@ export function MatrixCanvas({
     );
     gridLines.push(
       <text key={`hl-${i}`} x={PADDING - 8} y={cy + 4} textAnchor="end"
-        fontSize={11} fill="hsl(0,0%,40%)">{v}</text>
+        fontSize={11} fill="hsl(var(--foreground))">{v}</text>
     );
   }
 
@@ -95,18 +94,46 @@ export function MatrixCanvas({
           />
         )}
 
+        {/* Zone clip paths */}
+        <defs>
+          {zones.map(zone => (
+            <clipPath key={`clip-${zone.id}`} id={`zone-clip-${zone.id}`}>
+              <rect
+                x={toCanvasX(zone.x1)}
+                y={toCanvasY(zone.y2)}
+                width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
+                height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
+              />
+            </clipPath>
+          ))}
+        </defs>
+
         {/* Zones */}
         {zones.map(zone => (
-          <rect
-            key={zone.id}
-            x={toCanvasX(zone.x1)}
-            y={toCanvasY(zone.y2)}
-            width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
-            height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
-            fill={zone.color}
-            stroke="hsla(0,0%,0%,0.1)"
-            strokeWidth={1}
-          />
+          <g key={zone.id}>
+            <rect
+              x={toCanvasX(zone.x1)}
+              y={toCanvasY(zone.y2)}
+              width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
+              height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
+              fill={zone.color}
+              stroke="hsla(0,0%,0%,0.1)"
+              strokeWidth={1}
+            />
+            {/* Zone image */}
+            {zone.imageUrl && (
+              <image
+                href={zone.imageUrl}
+                x={toCanvasX(zone.x1)}
+                y={toCanvasY(zone.y2)}
+                width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
+                height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
+                opacity={zone.imageOpacity ?? 0.3}
+                preserveAspectRatio="xMidYMid slice"
+                clipPath={`url(#zone-clip-${zone.id})`}
+              />
+            )}
+          </g>
         ))}
 
         {/* Zone labels */}
@@ -153,6 +180,7 @@ export function MatrixCanvas({
           const cy = toCanvasY(p.y);
           const highlighted = isHighlighted(p);
           const dimmed = searchTerm && !highlighted;
+          const iconSize = highlighted ? 18 : 14;
           return (
             <g key={p.id}
               onMouseDown={(e) => { e.preventDefault(); setDragging(p.id); }}
@@ -160,11 +188,22 @@ export function MatrixCanvas({
               className="cursor-grab active:cursor-grabbing"
               opacity={dimmed ? 0.2 : 1}
             >
-              <circle cx={cx} cy={cy} r={highlighted ? 7 : 5}
-                fill={highlighted ? 'hsl(45,100%,50%)' : 'hsl(220,80%,50%)'}
-                stroke="hsl(0,0%,100%)" strokeWidth={1.5} />
+              {p.iconUrl ? (
+                <image
+                  href={p.iconUrl}
+                  x={cx - iconSize / 2}
+                  y={cy - iconSize / 2}
+                  width={iconSize}
+                  height={iconSize}
+                  style={{ borderRadius: '2px' }}
+                />
+              ) : (
+                <circle cx={cx} cy={cy} r={highlighted ? 7 : 5}
+                  fill={highlighted ? 'hsl(45,100%,50%)' : 'hsl(220,80%,50%)'}
+                  stroke="hsl(0,0%,100%)" strokeWidth={1.5} />
+              )}
               <title>{`${p.name} (${p.x}, ${p.y})`}</title>
-              <text x={cx + 8} y={cy + 4} fontSize={10} fill="hsl(var(--foreground))"
+              <text x={cx + (p.iconUrl ? iconSize / 2 + 3 : 8)} y={cy + 4} fontSize={10} fill="hsl(var(--foreground))"
                 className="pointer-events-none">{p.name}</text>
             </g>
           );

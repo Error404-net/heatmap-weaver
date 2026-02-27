@@ -4,15 +4,44 @@ const NAME_HINTS = ['name', 'label', 'title', 'browser', 'item', 'entity'];
 const X_HINTS = ['x', 'hot', 'capability', 'score_x', 'hot_x'];
 const Y_HINTS = ['y', 'crazy', 'risk', 'score_y', 'crazy_y'];
 const CAT_HINTS = ['category', 'type', 'group', 'engine', 'class'];
-const NOTES_HINTS = ['notes', 'description', 'placement', 'comment', 'suggested'];
+const NOTES_HINTS = ['notes', 'description', 'comment'];
+const PLACEMENT_HINTS = ['placement', 'suggested', 'quadrant', 'zone', 'position'];
+
+// Keyword → approximate coordinate ranges for hot-crazy style matrix (0-10)
+const PLACEMENT_MAP: Record<string, { xRange: [number, number]; yRange: [number, number] }> = {
+  'marry':   { xRange: [8, 10], yRange: [3, 5] },
+  'wife':    { xRange: [8, 10], yRange: [3, 5] },
+  'unicorn': { xRange: [8, 10], yRange: [8, 10] },
+  'date':    { xRange: [8, 10], yRange: [5, 8] },
+  'hot':     { xRange: [5, 8], yRange: [4, 7] },
+  'fun':     { xRange: [5, 8], yRange: [4, 7] },
+  'danger':  { xRange: [5, 8], yRange: [7, 10] },
+  'crazy':   { xRange: [3, 6], yRange: [6, 9] },
+  'nogo':    { xRange: [0, 5], yRange: [4, 10] },
+  'no-go':   { xRange: [0, 5], yRange: [4, 10] },
+  'no go':   { xRange: [0, 5], yRange: [4, 10] },
+};
+
+function jitter(min: number, max: number): number {
+  return Math.round((min + Math.random() * (max - min)) * 100) / 100;
+}
+
+function parsePlacement(text: string): { x: number; y: number } | null {
+  const lower = text.toLowerCase();
+  for (const [keyword, range] of Object.entries(PLACEMENT_MAP)) {
+    if (lower.includes(keyword)) {
+      return { x: jitter(range.xRange[0], range.xRange[1]), y: jitter(range.yRange[0], range.yRange[1]) };
+    }
+  }
+  // Default center
+  return { x: jitter(3, 7), y: jitter(3, 7) };
+}
 
 function matchColumn(headers: string[], hints: string[]): number {
-  // Exact match first
   for (const hint of hints) {
     const idx = headers.findIndex(h => h === hint);
     if (idx !== -1) return idx;
   }
-  // Partial match
   for (const hint of hints) {
     const idx = headers.findIndex(h => h.includes(hint));
     if (idx !== -1) return idx;
@@ -36,12 +65,12 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
 
   const header = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, '_'));
   
-  // Smart column detection
   let nameIdx = matchColumn(header, NAME_HINTS);
   let xIdx = matchColumn(header, X_HINTS);
   let yIdx = matchColumn(header, Y_HINTS);
   const catIdx = matchColumn(header, CAT_HINTS);
   const notesIdx = matchColumn(header, NOTES_HINTS);
+  const placementIdx = matchColumn(header, PLACEMENT_HINTS);
 
   // Fallback: first text column as name, first two numeric columns as x/y
   if (nameIdx === -1 || xIdx === -1 || yIdx === -1) {
@@ -58,8 +87,15 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
     if (yIdx === -1 && numericCols.length >= 2) yIdx = numericCols[1];
   }
 
-  if (nameIdx === -1 || xIdx === -1 || yIdx === -1) {
-    return { points: [], errors: ['Could not detect name, x, and y columns. Use columns like: name, x, y'] };
+  // If still no x/y but we have a placement column, use placement-based parsing
+  const usePlacement = (xIdx === -1 || yIdx === -1) && placementIdx !== -1;
+
+  if (nameIdx === -1) {
+    return { points: [], errors: ['Could not detect a name column. Use a column like: name, browser, label'] };
+  }
+
+  if (!usePlacement && (xIdx === -1 || yIdx === -1)) {
+    return { points: [], errors: ['Could not detect x/y columns or a placement column. Use columns like: name, x, y or include a Suggested_Matrix_Placement column'] };
   }
 
   const points: DataPoint[] = [];
@@ -68,18 +104,28 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(',').map(c => c.trim());
     const name = cols[nameIdx];
-    const x = parseFloat(cols[xIdx]);
-    const y = parseFloat(cols[yIdx]);
-
     if (!name) { errors.push(`Row ${i + 1}: missing name`); continue; }
-    if (isNaN(x) || isNaN(y)) { errors.push(`Row ${i + 1}: invalid x/y`); continue; }
+
+    let x: number, y: number;
+
+    if (usePlacement) {
+      const placementText = cols[placementIdx] || '';
+      const coords = parsePlacement(placementText);
+      if (!coords) { errors.push(`Row ${i + 1}: could not parse placement`); continue; }
+      x = coords.x;
+      y = coords.y;
+    } else {
+      x = parseFloat(cols[xIdx]);
+      y = parseFloat(cols[yIdx]);
+      if (isNaN(x) || isNaN(y)) { errors.push(`Row ${i + 1}: invalid x/y`); continue; }
+    }
 
     points.push({
       id: Math.random().toString(36).slice(2, 10),
       name,
       x, y,
       category: catIdx !== -1 ? cols[catIdx] : undefined,
-      notes: notesIdx !== -1 ? cols[notesIdx] : undefined,
+      notes: notesIdx !== -1 ? cols[notesIdx] : (usePlacement && placementIdx !== -1 ? cols[placementIdx] : undefined),
     });
   }
 

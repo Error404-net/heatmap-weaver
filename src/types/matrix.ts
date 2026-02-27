@@ -5,6 +5,7 @@ export interface DataPoint {
   y: number;
   category?: string;
   notes?: string;
+  iconUrl?: string;
 }
 
 export interface Zone {
@@ -15,6 +16,8 @@ export interface Zone {
   y1: number;
   x2: number;
   y2: number;
+  imageUrl?: string;
+  imageOpacity?: number;
 }
 
 export interface MatrixConfig {
@@ -50,4 +53,4 @@ export interface MatrixState {
   background: BackgroundConfig;
 }
 
-export type ColorScheme = 'classic' | 'dark' | 'pastel' | 'neon' | 'monochrome';
+export type ColorScheme = 'classic' | 'dark' | 'pastel' | 'neon' | 'monochrome' | 'ocean' | 'sunset' | 'forest' | 'cyberpunk';
