@@ -87,15 +87,10 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
     if (yIdx === -1 && numericCols.length >= 2) yIdx = numericCols[1];
   }
 
-  // If still no x/y but we have a placement column, use placement-based parsing
-  const usePlacement = (xIdx === -1 || yIdx === -1) && placementIdx !== -1;
+  // x/y and placement columns are optional; per-row fallback handles missing values
 
   if (nameIdx === -1) {
     return { points: [], errors: ['Could not detect a name column. Use a column like: name, browser, label'] };
-  }
-
-  if (!usePlacement && (xIdx === -1 || yIdx === -1)) {
-    return { points: [], errors: ['Could not detect x/y columns or a placement column. Use columns like: name, x, y or include a Suggested_Matrix_Placement column'] };
   }
 
   const points: DataPoint[] = [];
@@ -106,18 +101,28 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
     const name = cols[nameIdx];
     if (!name) { errors.push(`Row ${i + 1}: missing name`); continue; }
 
-    let x: number, y: number;
+    let x: number | undefined;
+    let y: number | undefined;
 
-    if (usePlacement) {
-      const placementText = cols[placementIdx] || '';
-      const coords = parsePlacement(placementText);
-      if (!coords) { errors.push(`Row ${i + 1}: could not parse placement`); continue; }
-      x = coords.x;
-      y = coords.y;
-    } else {
-      x = parseFloat(cols[xIdx]);
-      y = parseFloat(cols[yIdx]);
-      if (isNaN(x) || isNaN(y)) { errors.push(`Row ${i + 1}: invalid x/y`); continue; }
+    // Try numeric x/y first
+    if (xIdx !== -1 && yIdx !== -1) {
+      const px = parseFloat(cols[xIdx]);
+      const py = parseFloat(cols[yIdx]);
+      if (!isNaN(px) && !isNaN(py)) { x = px; y = py; }
+    }
+
+    // Fallback: placement column
+    if (x === undefined || y === undefined) {
+      if (placementIdx !== -1) {
+        const coords = parsePlacement(cols[placementIdx] || '');
+        if (coords) { x = coords.x; y = coords.y; }
+      }
+    }
+
+    // Final fallback: random center
+    if (x === undefined || y === undefined) {
+      x = jitter(3, 7);
+      y = jitter(3, 7);
     }
 
     points.push({
@@ -125,7 +130,7 @@ export function parseCSV(text: string): { points: DataPoint[]; errors: string[] 
       name,
       x, y,
       category: catIdx !== -1 ? cols[catIdx] : undefined,
-      notes: notesIdx !== -1 ? cols[notesIdx] : (usePlacement && placementIdx !== -1 ? cols[placementIdx] : undefined),
+      notes: notesIdx !== -1 ? cols[notesIdx] : (placementIdx !== -1 ? cols[placementIdx] : undefined),
     });
   }
 
