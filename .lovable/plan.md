@@ -1,33 +1,41 @@
 
 
-## Plan: Rename to RedFlag Grapher, Multi-Select, Fix Points & Background
+## Plan: Add Presets, Fix Multi-Select Drag, Add Sidebar Selection Controls
 
-### 1. Rename app to "RedFlag Grapher"
-- `index.html`: Update `<title>` and og:title to "RedFlag Grapher"
-- `src/pages/Index.tsx`: Add a header bar above the toolbar with "RedFlag Grapher" as the app title
-- `src/lib/presets.ts`: Update default preset title from "Universal Hot Crazy Matrix" to "RedFlag Grapher"
+### 1. Add more presets (`src/lib/presets.ts`)
+Add themed matrix presets alongside the existing Hot-Crazy and Blank:
+- **Effort vs Impact** (project prioritization: Quick Wins, Major Projects, Fill-Ins, Thankless Tasks)
+- **Risk vs Reward** (investment-style: Safe Bets, High Risk/High Reward, Money Pits, Moonshots)
+- **Skill vs Will** (employee assessment: Stars, High Potentials, Workhorses, Problem Children)
 
-### 2. Fix background image alignment (start at 0,0 not centered)
-- `src/components/MatrixCanvas.tsx`: Change background image `preserveAspectRatio` from `"xMidYMid slice"` to `"xMinYMax slice"` so the image anchors at the bottom-left (0,0 origin of the matrix)
+Each gets appropriate axis labels, zones with distinct colors, and sensible coordinate ranges (all 0-10).
 
-### 3. Fix points rendering off-chart
-- The CSV placement jitter ranges in `PLACEMENT_MAP` sometimes produce values at the exact boundary (0 or 10) which can render at the edge of padding. Clamp all imported point coordinates to stay within `[xMin + 0.2, xMax - 0.2]` and `[yMin + 0.2, yMax - 0.2]` after jitter
-- In `MatrixCanvas.tsx`, clamp point rendering coordinates to stay within the canvas area (between PADDING and PADDING + CANVAS_SIZE)
+### 2. Fix multi-select drag bug (`src/components/MatrixCanvas.tsx`, `src/pages/Index.tsx`)
+The current `handlePointsMove` calls `updatePoint` in a loop, each pushing to undo history and triggering a re-render mid-drag. This causes stale state issues. Fix:
+- In `useMatrixState.ts`: Add a `batchUpdatePoints` method that updates all points in a single `setState` call with one history push
+- In `Index.tsx`: Replace the `forEach` loop in `handlePointsMove` with the new batch method
+- In `MatrixCanvas.tsx`: The drag handler recalculates from `points` state which may be stale during rapid moves. Store initial positions at drag start and compute deltas from those rather than from current positions each frame
 
-### 4. Multi-select and group drag
-- `src/components/MatrixCanvas.tsx`:
-  - Add `selectedIds: Set<string>` state for tracking selected points
-  - Shift+click a point to toggle it in/out of selection
-  - Click without shift to select only that point (clear others)
-  - When dragging a selected point, move ALL selected points by the same delta
-  - Visual indicator: selected points get a highlight ring/outline
-  - Click on empty canvas area to deselect all
-- `src/pages/Index.tsx`: Update `handlePointMove` to accept batch moves; pass `onPointsMove` callback that updates multiple points at once
+### 3. Add sidebar checkboxes and mass-move controls (`src/components/MatrixSidebar.tsx`, `src/pages/Index.tsx`)
+- Add `selectedIds` and `onSelectedIdsChange` props to sidebar
+- Add checkboxes next to each point in the points list
+- Add a "Select All / Deselect All" toggle button
+- Add a "Mass Move Selected" section that appears when points are selected: X offset and Y offset inputs + "Apply" button that shifts all selected points by the offset
+- Add a "Delete Selected" button
+- Lift `selectedIds` state from `MatrixCanvas` up to `Index.tsx` so sidebar and canvas share selection state
+
+### 4. Lift selection state (`src/pages/Index.tsx`, `src/components/MatrixCanvas.tsx`)
+- Move `selectedIds` / `setSelectedIds` from MatrixCanvas to Index
+- Pass as props to both MatrixCanvas and MatrixSidebar
+- Canvas selection behavior (shift-click, click-to-select, click-empty-to-deselect) remains the same but uses lifted state
+
+### 5. Add batch update to hook (`src/hooks/useMatrixState.ts`)
+- Add `batchUpdatePoints(updates: Array<{id: string, partial: Partial<DataPoint>}>)` that does one `pushHistory()` and one `setState`
 
 ### Files touched
-- `index.html` -- title
-- `src/pages/Index.tsx` -- header title bar, batch point move handler
-- `src/components/MatrixCanvas.tsx` -- background alignment fix, multi-select + group drag, point clamping
-- `src/lib/presets.ts` -- default title
-- `src/lib/csvUtils.ts` -- clamp imported coordinates
+- `src/lib/presets.ts` -- 3 new presets
+- `src/hooks/useMatrixState.ts` -- add `batchUpdatePoints`
+- `src/pages/Index.tsx` -- lift selectedIds, wire batch move, pass to sidebar
+- `src/components/MatrixCanvas.tsx` -- receive selectedIds as prop, fix drag with initial positions
+- `src/components/MatrixSidebar.tsx` -- checkboxes, select all, mass move controls, delete selected
 
