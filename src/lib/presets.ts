@@ -3,14 +3,14 @@ import { MatrixPreset } from '@/types/matrix';
 export const PRESETS: MatrixPreset[] = [
   {
     id: 'hot-crazy',
-    name: 'Classic Hot-Crazy',
+    name: 'Crazy Hot Matrix',
     config: {
       title: 'Crazy Hot Matrix',
-      xAxisLabel: 'Hot Axis',
-      yAxisLabel: 'Crazy Axis',
+      xAxisLabel: 'HOT',
+      yAxisLabel: 'CRAZY',
       xMin: 0, xMax: 10, yMin: 4, yMax: 10,
       showDiagonal: true,
-      diagonalPoints: { x1: 5, y1: 4, x2: 10, y2: 10 },
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
     },
     zones: [
       { id: 'nogo', name: 'No-Go Zone', color: 'hsla(0, 70%, 60%, 0.5)', x1: 0, y1: 4, x2: 5, y2: 10 },

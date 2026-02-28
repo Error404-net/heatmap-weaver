@@ -1,11 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useMatrixState } from '@/hooks/useMatrixState';
 import { MatrixCanvas } from '@/components/MatrixCanvas';
 import { MatrixSidebar } from '@/components/MatrixSidebar';
 import { MatrixToolbar } from '@/components/MatrixToolbar';
 import { COLOR_SCHEMES } from '@/lib/presets';
 import { Input } from '@/components/ui/input';
-import { Search, Flame, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Search, PanelLeftClose, PanelLeft, Maximize, Minimize } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Button } from '@/components/ui/button';
 import { distributePoints } from '@/lib/distributePoints';
@@ -25,6 +25,7 @@ const Index = () => {
   const [placementMode, setPlacementMode] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [sidebarSize, setSidebarSize] = useState(24);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handlePointMove = (id: string, x: number, y: number) => {
     updatePoint(id, { x, y });
@@ -83,6 +84,48 @@ const Index = () => {
     batchUpdatePoints(updates);
   };
 
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const handleFullscreenToggle = async () => {
+    const root = canvasRef.current?.parentElement;
+    if (!root) return;
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+
+    await root.requestFullscreen();
+  };
+
+  const handleSetDiagonalFromZero = () => {
+    const end = Math.min(state.config.xMax, state.config.yMax);
+    updateConfig({
+      showDiagonal: true,
+      diagonalPoints: { x1: 0, y1: 0, x2: end, y2: end },
+    });
+  };
+
+  const handleSetDiagonalFromChartOrigin = () => {
+    const span = Math.min(state.config.xMax - state.config.xMin, state.config.yMax - state.config.yMin);
+    updateConfig({
+      showDiagonal: true,
+      diagonalPoints: {
+        x1: state.config.xMin,
+        y1: state.config.yMin,
+        x2: state.config.xMin + span,
+        y2: state.config.yMin + span,
+      },
+    });
+  };
+
   const applyColorScheme = (scheme: string) => {
     const colors = COLOR_SCHEMES[scheme];
     if (!colors) return;
@@ -98,10 +141,12 @@ const Index = () => {
   return (
     <div className="flex flex-col h-screen bg-background">
       <div className="flex items-center gap-2 px-4 py-2 border-b border-border bg-card">
-        <Flame className="w-5 h-5 text-destructive" />
-        <h1 className="text-lg font-bold text-foreground tracking-tight">CHMatrix</h1>
-        <span className="text-xs text-muted-foreground">Crazy Hot Matrix</span>
-        <div className="ml-auto">
+        <img src="/crazy-hot-matrix-logo.svg" alt="Crazy Hot Matrix logo" className="w-7 h-7 rounded" />
+        <h1 className="text-lg font-bold text-foreground tracking-tight">Crazy Hot Matrix</h1>
+        <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={handleFullscreenToggle} title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen chart'}>
+            {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+          </Button>
           <Button variant="ghost" size="icon" onClick={() => setSidebarVisible(v => !v)} title={sidebarVisible ? 'Hide menu' : 'Show menu'}>
             {sidebarVisible ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
           </Button>
@@ -126,7 +171,7 @@ const Index = () => {
               <ResizablePanel
                 defaultSize={sidebarSize}
                 minSize={16}
-                maxSize={45}
+                maxSize={70}
                 onResize={(size) => setSidebarSize(size)}
               >
                 <MatrixSidebar
@@ -148,6 +193,8 @@ const Index = () => {
                   onDistributeSelected={handleDistributeSelected}
                   onPlaceInZone={handlePlaceInZone}
                   onHideMenu={() => setSidebarVisible(false)}
+                  onSetDiagonalFromZero={handleSetDiagonalFromZero}
+                  onSetDiagonalFromChartOrigin={handleSetDiagonalFromChartOrigin}
                 />
               </ResizablePanel>
               <ResizableHandle withHandle />
