@@ -174,6 +174,9 @@ export function MatrixCanvas({
 
         {/* Zone clip paths */}
         <defs>
+          <pattern id="hatching" patternUnits="userSpaceOnUse" width={8} height={8}>
+            <path d="M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2" stroke="hsla(0,0%,50%,0.4)" strokeWidth={1.5} />
+          </pattern>
           {zones.map(zone => (
             <clipPath key={`clip-${zone.id}`} id={`zone-clip-${zone.id}`}>
               <rect
@@ -219,6 +222,15 @@ export function MatrixCanvas({
                 />
               );
             })()}
+            {zone.id === 'nogo' && (
+              <rect
+                x={toCanvasX(zone.x1)}
+                y={toCanvasY(zone.y2)}
+                width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
+                height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
+                fill="url(#hatching)"
+              />
+            )}
           </g>
         ))}
 
