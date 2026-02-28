@@ -24,6 +24,20 @@ npm run build
 npm run preview
 ```
 
+## Deploying to Cloudflare Pages
+
+Cloudflare auto-detected Bun because `bun.lockb` existed, then failed on an outdated Bun lockfile format.
+
+This repo now uses npm lockfiles for deployment, so configure Pages with:
+
+```bash
+Build command: npm run build
+Build output directory: dist
+Install command: npm ci
+```
+
+If you previously set a Bun install command (for example `bun install --frozen-lockfile`), replace it with `npm ci`.
+
 ## Tests
 
 ```bash
