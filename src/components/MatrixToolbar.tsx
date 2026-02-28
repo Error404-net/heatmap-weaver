@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Undo2, Redo2, Download, Image, Share2, Moon, Sun } from 'lucide-react';
+import { Undo2, Redo2, Download, Image, Moon, Sun } from 'lucide-react';
 import { PRESETS, COLOR_SCHEMES } from '@/lib/presets';
 import { BackgroundConfig } from '@/types/matrix';
 import { exportPNG, exportSVG, exportPDF } from '@/lib/exportUtils';
@@ -11,8 +11,8 @@ import { pointsToCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { DataPoint } from '@/types/matrix';
 import { toast } from 'sonner';
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from
+'@/components/ui/dropdown-menu';
 
 interface MatrixToolbarProps {
   onLoadPreset: (id: string) => void;
@@ -29,7 +29,7 @@ interface MatrixToolbarProps {
 
 export function MatrixToolbar({
   onLoadPreset, background, onUpdateBackground,
-  onUndo, onRedo, canUndo, canRedo, canvasRef, points, onApplyColorScheme,
+  onUndo, onRedo, canUndo, canRedo, canvasRef, points, onApplyColorScheme
 }: MatrixToolbarProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
   const [darkMode, setDarkMode] = useState(() => {
@@ -57,7 +57,7 @@ export function MatrixToolbar({
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = 'matrix_data.csv'; a.click();
+    a.href = url;a.download = 'matrix_data.csv';a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -75,9 +75,9 @@ export function MatrixToolbar({
           <SelectValue placeholder="Load Preset..." />
         </SelectTrigger>
         <SelectContent>
-          {PRESETS.map(p => (
-            <SelectItem key={p.id} value={p.id} className="text-xs">{p.name}</SelectItem>
-          ))}
+          {PRESETS.map((p) =>
+          <SelectItem key={p.id} value={p.id} className="text-xs">{p.name}</SelectItem>
+          )}
         </SelectContent>
       </Select>
 
@@ -87,9 +87,9 @@ export function MatrixToolbar({
           <SelectValue placeholder="Color Scheme" />
         </SelectTrigger>
         <SelectContent>
-          {Object.keys(COLOR_SCHEMES).map(k => (
-            <SelectItem key={k} value={k} className="text-xs capitalize">{k}</SelectItem>
-          ))}
+          {Object.keys(COLOR_SCHEMES).map((k) =>
+          <SelectItem key={k} value={k} className="text-xs capitalize">{k}</SelectItem>
+          )}
         </SelectContent>
       </Select>
 
@@ -99,25 +99,25 @@ export function MatrixToolbar({
         <Image className="w-3 h-3 mr-1" /> BG Image
       </Button>
 
-      {background.imageUrl && (
-        <div className="flex items-center gap-2">
+      {background.imageUrl &&
+      <div className="flex items-center gap-2">
           <Label className="text-xs">Opacity</Label>
           <Slider
-            value={[background.imageOpacity * 100]}
-            onValueChange={([v]) => onUpdateBackground({ imageOpacity: v / 100 })}
-            max={100} min={0} step={5}
-            className="w-24"
-          />
+          value={[background.imageOpacity * 100]}
+          onValueChange={([v]) => onUpdateBackground({ imageOpacity: v / 100 })}
+          max={100} min={0} step={5}
+          className="w-24" />
+
           <Button variant="ghost" size="sm" className="h-6 text-xs px-1"
-            onClick={() => onUpdateBackground({ imageUrl: null })}>✕</Button>
+        onClick={() => onUpdateBackground({ imageUrl: null })}>✕</Button>
         </div>
-      )}
+      }
 
       <div className="flex-1" />
 
       {/* Dark mode toggle */}
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDarkMode(!darkMode)}
-        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
+      title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
         {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
       </Button>
 
@@ -147,8 +147,8 @@ export function MatrixToolbar({
 
       {/* Share */}
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleShare}>
-        <Share2 className="w-4 h-4" />
+        
       </Button>
-    </div>
-  );
+    </div>);
+
 }
