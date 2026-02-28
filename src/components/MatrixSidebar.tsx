@@ -32,13 +32,17 @@ interface MatrixSidebarProps {
   onDistributeSelected: () => void;
   onPlaceInZone: (zoneId: string) => void;
   onHideMenu?: () => void;
+  onSetDiagonalFromZero?: () => void;
+  onSetDiagonalFromChartOrigin?: () => void;
 }
+
 
 export function MatrixSidebar({
   config, points, zones,
   onUpdateConfig, onAddPoint, onUpdatePoint, onDeletePoint, onSetPoints,
   onAddZone, onUpdateZone, onDeleteZone,
   selectedIds, onSelectedIdsChange, onDeleteSelected, onEnterPlaceMode, onDistributeSelected, onPlaceInZone, onHideMenu,
+  onSetDiagonalFromZero, onSetDiagonalFromChartOrigin,
 }: MatrixSidebarProps) {
   const [newName, setNewName] = useState('');
   const [newX, setNewX] = useState('');
@@ -204,6 +208,52 @@ export function MatrixSidebar({
                 onChange={e => onUpdateConfig({ showDiagonal: e.target.checked })}
                 className="accent-primary" />
               <Label className="text-xs">Show diagonal line</Label>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs">Diagonal X1</Label>
+                <Input
+                  type="number"
+                  value={config.diagonalPoints.x1}
+                  onChange={e => onUpdateConfig({ diagonalPoints: { ...config.diagonalPoints, x1: parseFloat(e.target.value) || 0 } })}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Diagonal Y1</Label>
+                <Input
+                  type="number"
+                  value={config.diagonalPoints.y1}
+                  onChange={e => onUpdateConfig({ diagonalPoints: { ...config.diagonalPoints, y1: parseFloat(e.target.value) || 0 } })}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Diagonal X2</Label>
+                <Input
+                  type="number"
+                  value={config.diagonalPoints.x2}
+                  onChange={e => onUpdateConfig({ diagonalPoints: { ...config.diagonalPoints, x2: parseFloat(e.target.value) || 0 } })}
+                  className="h-8 text-xs"
+                />
+              </div>
+              <div>
+                <Label className="text-xs">Diagonal Y2</Label>
+                <Input
+                  type="number"
+                  value={config.diagonalPoints.y2}
+                  onChange={e => onUpdateConfig({ diagonalPoints: { ...config.diagonalPoints, y2: parseFloat(e.target.value) || 0 } })}
+                  className="h-8 text-xs"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" size="sm" className="h-8 text-xs flex-1" onClick={onSetDiagonalFromZero}>
+                45° from (0,0)
+              </Button>
+              <Button type="button" variant="outline" size="sm" className="h-8 text-xs flex-1" onClick={onSetDiagonalFromChartOrigin}>
+                45° from min axis
+              </Button>
             </div>
           </div>
         )}
