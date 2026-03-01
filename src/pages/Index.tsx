@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { distributePoints } from '@/lib/distributePoints';
 
 const Index = () => {
-  const repositoryUrl = 'https://github.com/heatmap-weaver/heatmap-weaver';
+  const repositoryUrl = 'https://github.com/Error404-net/Crazy-Hot-Matrix-404';
 
   const {
     state, updateConfig,
