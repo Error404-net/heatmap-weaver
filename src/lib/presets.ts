@@ -23,6 +23,25 @@ export const PRESETS: MatrixPreset[] = [
     points: [],
   },
   {
+    id: 'magic-quadrant',
+    name: 'Magic Quadrant',
+    config: {
+      title: 'Magic Quadrant',
+      xAxisLabel: 'Completeness of Vision',
+      yAxisLabel: 'Ability to Execute',
+      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+      showDiagonal: false,
+      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+    },
+    zones: [
+      { id: 'challengers', name: 'Challengers', color: 'hsla(210, 70%, 55%, 0.4)', x1: 0, y1: 5, x2: 5, y2: 10 },
+      { id: 'leaders', name: 'Leaders', color: 'hsla(140, 60%, 50%, 0.4)', x1: 5, y1: 5, x2: 10, y2: 10 },
+      { id: 'niche-players', name: 'Niche Players', color: 'hsla(35, 80%, 55%, 0.4)', x1: 0, y1: 0, x2: 5, y2: 5 },
+      { id: 'visionaries', name: 'Visionaries', color: 'hsla(285, 65%, 60%, 0.4)', x1: 5, y1: 0, x2: 10, y2: 5 },
+    ],
+    points: [],
+  },
+  {
     id: 'effort-impact',
     name: 'Effort vs Impact',
     config: {

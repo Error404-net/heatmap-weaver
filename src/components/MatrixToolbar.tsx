@@ -72,11 +72,11 @@ export function MatrixToolbar({
       {/* Presets */}
       <Select onValueChange={onLoadPreset}>
         <SelectTrigger className="w-44 h-8 text-xs">
-          <SelectValue placeholder="Load Preset..." />
+          <SelectValue placeholder="Load Template" />
         </SelectTrigger>
         <SelectContent>
           {PRESETS.map((p) =>
-          <SelectItem key={p.id} value={p.id} className="text-xs">{p.name}</SelectItem>
+          <SelectItem key={p.id} value={p.id} className="text-xs">{p.name} (Template)</SelectItem>
           )}
         </SelectContent>
       </Select>
