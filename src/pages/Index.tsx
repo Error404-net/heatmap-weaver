@@ -5,12 +5,14 @@ import { MatrixSidebar } from '@/components/MatrixSidebar';
 import { MatrixToolbar } from '@/components/MatrixToolbar';
 import { COLOR_SCHEMES } from '@/lib/presets';
 import { Input } from '@/components/ui/input';
-import { Search, PanelLeftClose, PanelLeft, Maximize, Minimize } from 'lucide-react';
+import { Search, PanelLeftClose, PanelLeft, Maximize, Minimize, Github } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Button } from '@/components/ui/button';
 import { distributePoints } from '@/lib/distributePoints';
 
 const Index = () => {
+  const repositoryUrl = 'https://github.com/heatmap-weaver/heatmap-weaver';
+
   const {
     state, updateConfig,
     addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints,
@@ -144,6 +146,11 @@ const Index = () => {
         <img src="/crazy-hot-matrix-logo.svg" alt="Crazy Hot Matrix logo" className="w-7 h-7 rounded" />
         <h1 className="text-lg font-bold text-foreground tracking-tight">Crazy Hot Matrix</h1>
         <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" asChild title="View source on GitHub">
+            <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" aria-label="Open GitHub repository">
+              <Github className="w-4 h-4" />
+            </a>
+          </Button>
           <Button variant="ghost" size="icon" onClick={handleFullscreenToggle} title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen chart'}>
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </Button>
