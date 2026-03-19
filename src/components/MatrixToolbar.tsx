@@ -7,8 +7,8 @@ import { Undo2, Redo2, Download, Image, Moon, Sun } from 'lucide-react';
 import { PRESETS, COLOR_SCHEMES } from '@/lib/presets';
 import { BackgroundConfig } from '@/types/matrix';
 import { exportPNG, exportSVG, exportPDF } from '@/lib/exportUtils';
-import { pointsToCSV, downloadSampleCSV } from '@/lib/csvUtils';
-import { DataPoint } from '@/types/matrix';
+import { matrixToCSV, downloadSampleCSV, downloadSampleMatrixCSV } from '@/lib/csvUtils';
+import { DataPoint, Zone } from '@/types/matrix';
 import { toast } from 'sonner';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from
@@ -24,12 +24,13 @@ interface MatrixToolbarProps {
   canRedo: boolean;
   canvasRef: React.RefObject<HTMLDivElement>;
   points: DataPoint[];
+  zones: Zone[];
   onApplyColorScheme: (scheme: string) => void;
 }
 
 export function MatrixToolbar({
   onLoadPreset, background, onUpdateBackground,
-  onUndo, onRedo, canUndo, canRedo, canvasRef, points, onApplyColorScheme
+  onUndo, onRedo, canUndo, canRedo, canvasRef, points, zones, onApplyColorScheme
 }: MatrixToolbarProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
   const [darkMode, setDarkMode] = useState(() => {
@@ -53,7 +54,7 @@ export function MatrixToolbar({
   };
 
   const handleExportCSV = () => {
-    const csv = pointsToCSV(points);
+    const csv = matrixToCSV(points, zones);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -141,7 +142,8 @@ export function MatrixToolbar({
           <DropdownMenuItem className="text-xs" onClick={() => canvasRef.current && exportSVG(canvasRef.current)}>SVG</DropdownMenuItem>
           <DropdownMenuItem className="text-xs" onClick={() => canvasRef.current && exportPDF(canvasRef.current)}>PDF</DropdownMenuItem>
           <DropdownMenuItem className="text-xs" onClick={handleExportCSV}>CSV (data)</DropdownMenuItem>
-          <DropdownMenuItem className="text-xs" onClick={downloadSampleCSV}>CSV Template</DropdownMenuItem>
+          <DropdownMenuItem className="text-xs" onClick={downloadSampleCSV}>CSV Template (points)</DropdownMenuItem>
+          <DropdownMenuItem className="text-xs" onClick={downloadSampleMatrixCSV}>CSV Template (matrix)</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

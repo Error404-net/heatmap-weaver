@@ -45,6 +45,7 @@ export interface MatrixPreset {
   config: MatrixConfig;
   zones: Zone[];
   points: DataPoint[];
+  pointsCsvPath?: string;
 }
 
 export interface MatrixState {

@@ -1,0 +1,18 @@
+name,x,y,category,notes
+Google Ultron,9.4,1.0,Unicorn,Intentionally placed in unicorn position
+Island Enterprise Browser,8.9,2.7,Enterprise Secure Browser,Remote browser isolation focus
+Talon,8.6,3.1,Enterprise Secure Browser,Enterprise security posture
+Palo Alto Prisma Access Browser,8.2,3.8,Enterprise Secure Browser,SASE-adjacent secure browser
+Citrix Secure Private Access Browser,7.9,3.6,Enterprise Secure Browser,Enterprise access workflow
+Surf Security Browser,7.7,4.0,Enterprise Secure Browser,Security-led managed browser
+Firefox,7.0,4.8,Mainstream Browser,Strong admin story but less enterprise-native
+Safari,6.8,3.9,Mainstream Browser,Important platform browser for Apple environments
+Chrome Enterprise,8.1,4.6,Enterprise Browser,Common enterprise default
+Microsoft Edge for Business,8.4,4.4,Enterprise Browser,Very common managed enterprise browser
+Brave,6.4,5.1,Consumer Privacy Browser,Security-conscious but not enterprise-first
+Opera,5.8,6.0,Consumer Browser,General browser placeholder
+QQ Browser,3.8,7.2,Risky Browser,Placeholder risk example
+FakeUpdate Browser Loader,2.0,8.5,Malware,Malware placeholder
+RedLine Infostealer Shell,1.5,9.2,Malware,Malware placeholder
+BrowserHijack Pro,2.8,8.0,Malware,Malware placeholder
+Tor Browser,5.5,7.1,Specialized Browser,Useful but potentially “crazy” in enterprise policy contexts

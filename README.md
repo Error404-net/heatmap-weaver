@@ -24,6 +24,69 @@ npm run build
 npm run preview
 ```
 
+## Templates and CSV data
+
+Built-in templates are defined in `src/lib/presets.ts`.
+
+Templates can either embed `points` directly in the preset or load point data from a CSV in `public/data/` via `pointsCsvPath`. The new `Enterprise Browsers` template reuses the Crazy Hot Matrix layout and loads its seed data from `public/data/enterprise-browsers.csv`.
+
+### Enterprise Browsers maintainer workflow
+
+1. Update the preset metadata in `src/lib/presets.ts` if you need to rename the template, axes, or default zones.
+2. Update `public/data/enterprise-browsers.csv` to change the built-in browser list.
+3. Keep explicit `x` and `y` coordinates in the CSV for deterministic placement.
+4. Keep `Google Ultron` inside the current unicorn zone (`x: 8–10`, `y: 0–2`) unless the template geometry changes intentionally.
+5. Run `npm run test` after editing either the preset or the CSV so the seed sanity checks still pass.
+
+The current browser rows are placeholder content intended to demonstrate categories and placement, not a final market ranking.
+
+### Point CSV fields
+
+Point-only CSV import/export still supports the existing schema:
+
+- `name`
+- `x`
+- `y`
+- `category`
+- `notes`
+
+Point coordinates are exported explicitly, so exporting and re-importing preserves the last saved point placement.
+
+### Matrix CSV fields
+
+Full matrix CSV import/export uses a `record_type` column so both points and zones can round-trip in one file.
+
+#### Point rows
+
+- `record_type=point`
+- `name`
+- `x`
+- `y`
+- `category`
+- `notes`
+
+#### Zone rows
+
+- `record_type=zone`
+- `name`
+- `color`
+- `x1`
+- `y1`
+- `x2`
+- `y2`
+- optional: `image_url`
+- optional: `image_opacity`
+- optional: `image_scale`
+
+If a CSV includes `record_type=zone`, the sidebar importer treats it as full matrix state and replaces the current points and zones together. Older point-only CSV files without `record_type` still import as append-only point lists.
+
+### Sample downloads
+
+The toolbar now exposes two CSV templates:
+
+- `CSV Template (points)` for quick point-only imports.
+- `CSV Template (matrix)` for full matrix state imports with zone rows.
+
 ## Deploying to Cloudflare Pages
 
 Cloudflare auto-detected Bun because `bun.lockb` existed, then failed on an outdated Bun lockfile format.
