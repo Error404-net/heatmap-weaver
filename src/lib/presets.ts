@@ -1,26 +1,38 @@
 import { MatrixPreset } from '@/types/matrix';
 
+const crazyHotConfig = {
+  title: 'Crazy Hot Matrix',
+  xAxisLabel: 'HOT',
+  yAxisLabel: 'CRAZY',
+  xMin: 0, xMax: 10, yMin: 0, yMax: 10,
+  showDiagonal: true,
+  diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
+};
+
+const crazyHotZones = [
+  { id: 'nogo', name: 'No-Go Zone', color: 'hsla(0, 70%, 60%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 10 },
+  { id: 'fun', name: 'Fun Zone', color: 'hsla(270, 50%, 60%, 0.5)', x1: 5, y1: 0, x2: 8, y2: 5 },
+  { id: 'danger', name: 'Danger Zone', color: 'hsla(30, 90%, 55%, 0.5)', x1: 5, y1: 5, x2: 8, y2: 10 },
+  { id: 'date', name: 'Date Zone', color: 'hsla(195, 80%, 60%, 0.5)', x1: 8, y1: 5, x2: 10, y2: 10 },
+  { id: 'unicorn', name: 'Unicorn Zone', color: 'hsla(300, 80%, 75%, 0.5)', x1: 8, y1: 0, x2: 10, y2: 2 },
+  { id: 'wife', name: 'Wife Zone', color: 'hsla(120, 70%, 55%, 0.5)', x1: 8, y1: 2, x2: 10, y2: 5 },
+];
+
 export const PRESETS: MatrixPreset[] = [
   {
     id: 'hot-crazy',
     name: 'Crazy Hot Matrix',
-    config: {
-      title: 'Crazy Hot Matrix',
-      xAxisLabel: 'HOT',
-      yAxisLabel: 'CRAZY',
-      xMin: 0, xMax: 10, yMin: 0, yMax: 10,
-      showDiagonal: true,
-      diagonalPoints: { x1: 0, y1: 0, x2: 10, y2: 10 },
-    },
-    zones: [
-      { id: 'nogo', name: 'No-Go Zone', color: 'hsla(0, 70%, 60%, 0.5)', x1: 0, y1: 0, x2: 5, y2: 10 },
-      { id: 'fun', name: 'Fun Zone', color: 'hsla(270, 50%, 60%, 0.5)', x1: 5, y1: 0, x2: 8, y2: 5 },
-      { id: 'danger', name: 'Danger Zone', color: 'hsla(30, 90%, 55%, 0.5)', x1: 5, y1: 5, x2: 8, y2: 10 },
-      { id: 'date', name: 'Date Zone', color: 'hsla(195, 80%, 60%, 0.5)', x1: 8, y1: 5, x2: 10, y2: 10 },
-      { id: 'unicorn', name: 'Unicorn Zone', color: 'hsla(300, 80%, 75%, 0.5)', x1: 8, y1: 0, x2: 10, y2: 2 },
-      { id: 'wife', name: 'Wife Zone', color: 'hsla(120, 70%, 55%, 0.5)', x1: 8, y1: 2, x2: 10, y2: 5 },
-    ],
+    config: { ...crazyHotConfig },
+    zones: crazyHotZones.map((zone) => ({ ...zone })),
     points: [],
+  },
+  {
+    id: 'enterprise-browsers',
+    name: 'Enterprise Browsers',
+    config: { ...crazyHotConfig, title: 'Enterprise Browsers' },
+    zones: crazyHotZones.map((zone) => ({ ...zone })),
+    points: [],
+    pointsCsvPath: '/data/enterprise-browsers.csv',
   },
   {
     id: 'magic-quadrant',

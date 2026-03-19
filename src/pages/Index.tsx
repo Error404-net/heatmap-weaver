@@ -15,7 +15,7 @@ const Index = () => {
 
   const {
     state, updateConfig,
-    addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints,
+    addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints, replaceMatrixData,
     addZone, updateZone, deleteZone,
     updateBackground, loadPreset,
     undo, redo, canUndo, canRedo,
@@ -169,6 +169,7 @@ const Index = () => {
         canRedo={canRedo}
         canvasRef={canvasRef as React.RefObject<HTMLDivElement>}
         points={state.points}
+        zones={state.zones}
         onApplyColorScheme={applyColorScheme}
       />
       <div className="flex-1 overflow-hidden">
@@ -191,6 +192,7 @@ const Index = () => {
                   onDeletePoint={deletePoint}
                   onSetPoints={setPoints}
                   onAddZone={addZone}
+                  onReplaceMatrixData={replaceMatrixData}
                   onUpdateZone={updateZone}
                   onDeleteZone={deleteZone}
                   selectedIds={selectedIds}

@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Plus, Upload, Edit2, X, Check, FileDown, Grid3X3, ImagePlus, MousePointerClick, Shuffle, CheckSquare, MapPin, PanelLeftClose } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DataPoint, Zone, MatrixConfig } from '@/types/matrix';
-import { parseCSV, downloadSampleCSV } from '@/lib/csvUtils';
+import { parseMatrixCSV, downloadSampleCSV } from '@/lib/csvUtils';
 import { distributePoints } from '@/lib/distributePoints';
 import { toast } from 'sonner';
 
@@ -23,6 +23,7 @@ interface MatrixSidebarProps {
   onDeletePoint: (id: string) => void;
   onSetPoints: (points: DataPoint[]) => void;
   onAddZone: (zone: Omit<Zone, 'id'>) => void;
+  onReplaceMatrixData: (data: { points: DataPoint[]; zones: Zone[] }) => void;
   onUpdateZone: (id: string, partial: Partial<Zone>) => void;
   onDeleteZone: (id: string) => void;
   selectedIds: Set<string>;
@@ -40,7 +41,7 @@ interface MatrixSidebarProps {
 export function MatrixSidebar({
   config, points, zones,
   onUpdateConfig, onAddPoint, onUpdatePoint, onDeletePoint, onSetPoints,
-  onAddZone, onUpdateZone, onDeleteZone,
+  onAddZone, onReplaceMatrixData, onUpdateZone, onDeleteZone,
   selectedIds, onSelectedIdsChange, onDeleteSelected, onEnterPlaceMode, onDistributeSelected, onPlaceInZone, onHideMenu,
   onSetDiagonalFromZero, onSetDiagonalFromChartOrigin,
 }: MatrixSidebarProps) {
@@ -76,11 +77,17 @@ export function MatrixSidebar({
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result as string;
-      const { points: parsed, errors } = parseCSV(text);
+      const { points: parsedPoints, zones: parsedZones, errors, hasMatrixRecords } = parseMatrixCSV(text);
       if (errors.length > 0) toast.error(errors.slice(0, 3).join(', '));
-      if (parsed.length > 0) {
-        onSetPoints([...points, ...parsed]);
-        toast.success(`Imported ${parsed.length} points`);
+      if (hasMatrixRecords) {
+        onReplaceMatrixData({ points: parsedPoints, zones: parsedZones });
+        toast.success(`Imported ${parsedPoints.length} points and ${parsedZones.length} zones`);
+        return;
+      }
+
+      if (parsedPoints.length > 0) {
+        onSetPoints([...points, ...parsedPoints]);
+        toast.success(`Imported ${parsedPoints.length} points`);
       }
     };
     reader.readAsText(file);

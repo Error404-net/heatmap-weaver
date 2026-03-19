@@ -75,7 +75,7 @@ export function MatrixCanvas({
       const y = clampY(Math.round(fromCanvasY(cy) * 100) / 100);
       onPointMove(dragging, x, y);
     }
-  }, [dragging, dragStart, selectedIds, fromCanvasX, fromCanvasY, onPointMove, onPointsMove, xMin, xMax, yMin, yMax]);
+  }, [clampX, clampY, dragging, dragStart, selectedIds, fromCanvasX, fromCanvasY, onPointMove, onPointsMove]);
 
   const handleMouseDown = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
@@ -177,6 +177,13 @@ export function MatrixCanvas({
           <pattern id="hatching" patternUnits="userSpaceOnUse" width={8} height={8}>
             <path d="M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2" stroke="hsla(0,0%,50%,0.4)" strokeWidth={1.5} />
           </pattern>
+          <linearGradient id="diagonal-zone-fade" gradientUnits="userSpaceOnUse" x1={PADDING} y1={PADDING + CANVAS_SIZE} x2={PADDING + CANVAS_SIZE} y2={PADDING}>
+            <stop offset="0%" stopColor="hsla(0, 0%, 100%, 0)" />
+            <stop offset="42%" stopColor="hsla(0, 0%, 100%, 0)" />
+            <stop offset="50%" stopColor="hsla(0, 0%, 100%, 0.3)" />
+            <stop offset="58%" stopColor="hsla(0, 0%, 100%, 0)" />
+            <stop offset="100%" stopColor="hsla(0, 0%, 100%, 0)" />
+          </linearGradient>
           {zones.map(zone => (
             <clipPath key={`clip-${zone.id}`} id={`zone-clip-${zone.id}`}>
               <rect
@@ -233,6 +240,17 @@ export function MatrixCanvas({
             )}
           </g>
         ))}
+
+        {config.showDiagonal && zones.length > 0 && (
+          <rect
+            x={PADDING}
+            y={PADDING}
+            width={CANVAS_SIZE}
+            height={CANVAS_SIZE}
+            fill="url(#diagonal-zone-fade)"
+            pointerEvents="none"
+          />
+        )}
 
         {/* Zone labels */}
         {zones.map(zone => {

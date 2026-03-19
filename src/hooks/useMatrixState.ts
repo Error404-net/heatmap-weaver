@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { MatrixState, DataPoint, Zone, MatrixConfig, BackgroundConfig } from '@/types/matrix';
 import { PRESETS } from '@/lib/presets';
+import { parseCSV } from '@/lib/csvUtils';
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -95,16 +96,41 @@ export function useMatrixState() {
     setState(s => ({ ...s, background: { ...s.background, ...partial } }));
   }, []);
 
+  const replaceMatrixData = useCallback(({ points, zones }: { points: DataPoint[]; zones: Zone[] }) => {
+    pushHistory();
+    setState(s => ({ ...s, points, zones }));
+  }, [pushHistory]);
+
+  const setZones = useCallback((zones: Zone[]) => {
+    pushHistory();
+    setState(s => ({ ...s, zones }));
+  }, [pushHistory]);
+
   // Load preset
-  const loadPreset = useCallback((presetId: string) => {
+  const loadPreset = useCallback(async (presetId: string) => {
     const preset = PRESETS.find(p => p.id === presetId);
     if (!preset) return;
+
     pushHistory();
+
+    let points = preset.points.map(p => ({ ...p }));
+    if (preset.pointsCsvPath) {
+      try {
+        const response = await fetch(preset.pointsCsvPath);
+        if (!response.ok) throw new Error(`Failed to load ${preset.pointsCsvPath}`);
+        const text = await response.text();
+        const parsed = parseCSV(text);
+        points = parsed.points;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
     setState(s => ({
       ...s,
       config: { ...preset.config },
       zones: preset.zones.map(z => ({ ...z })),
-      points: preset.points.map(p => ({ ...p })),
+      points,
     }));
   }, [pushHistory]);
 
@@ -128,8 +154,8 @@ export function useMatrixState() {
   return {
     state,
     updateConfig,
-    addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints,
-    addZone, updateZone, deleteZone,
+    addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints, replaceMatrixData,
+    addZone, updateZone, deleteZone, setZones,
     updateBackground,
     loadPreset,
     undo, redo, canUndo, canRedo,
