@@ -8,7 +8,7 @@ import type { DataPoint, Zone } from '@/types/matrix';
 describe('csvUtils matrix CSV support', () => {
   it('preserves point coordinates during matrix CSV round-trip', () => {
     const points: DataPoint[] = [
-      { id: 'alpha', name: 'Alpha', x: 9.41, y: 1.07, category: 'Unicorn', notes: 'seed' },
+      { id: 'alpha', name: 'Alpha', x: 9.41, y: 1.07, category: 'Unicorn', notes: 'seed', iconUrl: '/data/browser-icons/chrome.svg' },
       { id: 'beta', name: 'Beta', x: 6.23, y: 4.88, category: 'Mainstream', notes: 'round-trip' },
     ];
 
@@ -16,9 +16,9 @@ describe('csvUtils matrix CSV support', () => {
 
     expect(parsed.errors).toEqual([]);
     expect(parsed.points).toHaveLength(2);
-    expect(parsed.points.map(({ name, x, y }) => ({ name, x, y }))).toEqual([
-      { name: 'Alpha', x: 9.41, y: 1.07 },
-      { name: 'Beta', x: 6.23, y: 4.88 },
+    expect(parsed.points.map(({ name, x, y, iconUrl }) => ({ name, x, y, iconUrl }))).toEqual([
+      { name: 'Alpha', x: 9.41, y: 1.07, iconUrl: '/data/browser-icons/chrome.svg' },
+      { name: 'Beta', x: 6.23, y: 4.88, iconUrl: undefined },
     ]);
   });
 
@@ -75,6 +75,7 @@ describe('csvUtils matrix CSV support', () => {
     expect(parsed.errors).toEqual([]);
     expect(parsed.points.some((point) => point.name === 'Safari')).toBe(true);
     expect(parsed.points.some((point) => point.name === 'Firefox')).toBe(true);
+    expect(parsed.points.find((point) => point.name === 'Chrome Enterprise')?.iconUrl).toBe('/data/browser-icons/chrome.svg');
     expect(googleUltron).toBeDefined();
     expect(unicornZone).toBeDefined();
     expect(googleUltron!.x).toBeGreaterThanOrEqual(unicornZone!.x1);
