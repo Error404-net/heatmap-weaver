@@ -5,6 +5,7 @@ const X_HINTS = ['x', 'hot', 'capability', 'score_x', 'hot_x'];
 const Y_HINTS = ['y', 'crazy', 'risk', 'score_y', 'crazy_y'];
 const CAT_HINTS = ['category', 'type', 'group', 'engine', 'class'];
 const NOTES_HINTS = ['notes', 'description', 'comment'];
+const ICON_URL_HINTS = ['icon_url', 'iconurl', 'icon', 'logo_url', 'logo'];
 const PLACEMENT_HINTS = ['placement', 'suggested', 'quadrant', 'zone', 'position'];
 const RECORD_TYPE_HINTS = ['record_type', 'recordtype', 'type'];
 const COLOR_HINTS = ['color', 'fill'];
@@ -23,6 +24,7 @@ const MATRIX_CSV_HEADER = [
   'y',
   'category',
   'notes',
+  'icon_url',
   'color',
   'x1',
   'y1',
@@ -33,11 +35,11 @@ const MATRIX_CSV_HEADER = [
   'image_scale',
 ] as const;
 
-const SAMPLE_MATRIX_CSV = `record_type,name,x,y,category,notes,color,x1,y1,x2,y2,image_url,image_opacity,image_scale
-zone,Unicorn Zone,,,,,hsla(300, 80%, 75%, 0.5),8,0,10,2,,,
-zone,Wife Zone,,,,,hsla(120, 70%, 55%, 0.5),8,2,10,5,,,
-point,Example Browser,8.4,3.1,Enterprise Browser,Example plotted point,,,,,,,,
-point,Example Privacy Browser,6.2,5.4,Specialized Browser,Example point-only import row,,,,,,,,`;
+const SAMPLE_MATRIX_CSV = `record_type,name,x,y,category,notes,icon_url,color,x1,y1,x2,y2,image_url,image_opacity,image_scale
+zone,Unicorn Zone,,,,,,hsla(300, 80%, 75%, 0.5),8,0,10,2,,,
+zone,Wife Zone,,,,,,hsla(120, 70%, 55%, 0.5),8,2,10,5,,,
+point,Example Browser,8.4,3.1,Enterprise Browser,Example plotted point,/data/browser-icons/chrome.svg,,,,,,,,
+point,Example Privacy Browser,6.2,5.4,Specialized Browser,Example point-only import row,/data/browser-icons/tor.svg,,,,,,,,`;
 
 // Keyword → approximate coordinate ranges for hot-crazy style matrix (0-10)
 const PLACEMENT_MAP: Record<string, { xRange: [number, number]; yRange: [number, number] }> = {
@@ -177,6 +179,7 @@ export function parseMatrixCSV(text: string): ParsedMatrixCSV {
   let yIdx = matchColumn(header, Y_HINTS);
   const catIdx = matchColumn(header, CAT_HINTS);
   const notesIdx = matchColumn(header, NOTES_HINTS);
+  const iconUrlIdx = matchColumn(header, ICON_URL_HINTS);
   const placementIdx = matchColumn(header, PLACEMENT_HINTS);
   const recordTypeIdx = matchColumn(header, RECORD_TYPE_HINTS);
   const colorIdx = matchColumn(header, COLOR_HINTS);
@@ -294,6 +297,7 @@ export function parseMatrixCSV(text: string): ParsedMatrixCSV {
         y,
         category: catIdx !== -1 ? cols[catIdx] || undefined : undefined,
         notes: notesIdx !== -1 ? cols[notesIdx] || undefined : placementIdx !== -1 ? cols[placementIdx] || undefined : undefined,
+        iconUrl: iconUrlIdx !== -1 ? cols[iconUrlIdx] || undefined : undefined,
       });
     }
   });
@@ -317,6 +321,7 @@ export function matrixToCSV(points: DataPoint[], zones: Zone[]): string {
       '',
       '',
       '',
+      '',
       csvEscape(zone.color),
       csvEscape(zone.x1),
       csvEscape(zone.y1),
@@ -336,6 +341,7 @@ export function matrixToCSV(points: DataPoint[], zones: Zone[]): string {
       csvEscape(point.y),
       csvEscape(point.category),
       csvEscape(point.notes),
+      csvEscape(point.iconUrl),
       '',
       '',
       '',
@@ -351,22 +357,23 @@ export function matrixToCSV(points: DataPoint[], zones: Zone[]): string {
 }
 
 export function pointsToCSV(points: DataPoint[]): string {
-  const header = 'name,x,y,category,notes';
+  const header = 'name,x,y,category,notes,icon_url';
   const rows = points.map((point) => [
     csvEscape(point.name),
     csvEscape(point.x),
     csvEscape(point.y),
     csvEscape(point.category),
     csvEscape(point.notes),
+    csvEscape(point.iconUrl),
   ].join(','));
   return [header, ...rows].join('\n');
 }
 
-export const SAMPLE_CSV = `name,x,y,category,notes
-Example Item A,7.5,3.2,Good,Top performer
-Example Item B,4.0,6.8,Risky,Needs review
-Example Item C,8.5,2.0,Great,Best in class
-Example Item D,2.5,8.5,Avoid,Too unstable`;
+export const SAMPLE_CSV = `name,x,y,category,notes,icon_url
+Example Item A,7.5,3.2,Good,Top performer,
+Example Item B,4.0,6.8,Risky,Needs review,
+Example Item C,8.5,2.0,Great,Best in class,
+Example Item D,2.5,8.5,Avoid,Too unstable,`;
 
 function downloadBlob(contents: string, filename: string) {
   const blob = new Blob([contents], { type: 'text/csv' });

@@ -34,9 +34,10 @@ Templates can either embed `points` directly in the preset or load point data fr
 
 1. Update the preset metadata in `src/lib/presets.ts` if you need to rename the template, axes, or default zones.
 2. Update `public/data/enterprise-browsers.csv` to change the built-in browser list.
-3. Keep explicit `x` and `y` coordinates in the CSV for deterministic placement.
-4. Keep `Google Ultron` inside the current unicorn zone (`x: 8–10`, `y: 0–2`) unless the template geometry changes intentionally.
-5. Run `npm run test` after editing either the preset or the CSV so the seed sanity checks still pass.
+3. Keep browser icon assets alongside the CSV in `public/data/browser-icons/`, then reference them from the CSV with `icon_url`.
+4. Keep explicit `x` and `y` coordinates in the CSV for deterministic placement.
+5. Keep `Google Ultron` inside the current unicorn zone (`x: 8–10`, `y: 0–2`) unless the template geometry changes intentionally.
+6. Run `npm run test` after editing either the preset or the CSV so the seed sanity checks still pass.
 
 The current browser rows are placeholder content intended to demonstrate categories and placement, not a final market ranking.
 
@@ -49,8 +50,10 @@ Point-only CSV import/export still supports the existing schema:
 - `y`
 - `category`
 - `notes`
+- optional: `icon_url`
 
 Point coordinates are exported explicitly, so exporting and re-importing preserves the last saved point placement.
+Point icons can be seeded from CSV with `icon_url` when you want branded markers instead of plain dots.
 
 ### Matrix CSV fields
 
