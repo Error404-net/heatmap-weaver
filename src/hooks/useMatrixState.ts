@@ -9,6 +9,7 @@ function generateId() {
 
 export function useMatrixState() {
   const defaultPreset = PRESETS[0];
+  const blankPreset = PRESETS.find((preset) => preset.id === 'blank') ?? defaultPreset;
   const [state, setState] = useState<MatrixState>({
     config: { ...defaultPreset.config },
     zones: defaultPreset.zones.map(z => ({ ...z })),
@@ -130,9 +131,19 @@ export function useMatrixState() {
       ...s,
       config: { ...preset.config },
       zones: preset.zones.map(z => ({ ...z })),
-      points,
+      points: s.points.length > 0 ? s.points : points,
     }));
   }, [pushHistory]);
+
+  const startNewSession = useCallback(() => {
+    pushHistory();
+    setState({
+      config: { ...blankPreset.config },
+      zones: blankPreset.zones.map((zone) => ({ ...zone })),
+      points: [],
+      background: { imageUrl: null, imageOpacity: 0.3, colorScheme: 'classic' },
+    });
+  }, [blankPreset, pushHistory]);
 
   const batchUpdatePoints = useCallback((updates: Array<{ id: string; partial: Partial<DataPoint> }>) => {
     pushHistory();
@@ -158,6 +169,7 @@ export function useMatrixState() {
     addZone, updateZone, deleteZone, setZones,
     updateBackground,
     loadPreset,
+    startNewSession,
     undo, redo, canUndo, canRedo,
   };
 }

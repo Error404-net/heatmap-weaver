@@ -2,14 +2,14 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Undo2, Redo2, Download, Image, Moon, Sun } from 'lucide-react';
+import { Undo2, Redo2, Download, Image, Moon, Sun, Search, PanelLeft } from 'lucide-react';
 import { PRESETS, COLOR_SCHEMES } from '@/lib/presets';
 import { BackgroundConfig } from '@/types/matrix';
 import { exportPNG, exportSVG, exportPDF } from '@/lib/exportUtils';
 import { matrixToCSV, downloadSampleCSV, downloadSampleMatrixCSV } from '@/lib/csvUtils';
 import { DataPoint, Zone } from '@/types/matrix';
-import { toast } from 'sonner';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from
 '@/components/ui/dropdown-menu';
@@ -22,15 +22,21 @@ interface MatrixToolbarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  onStartNew: () => void;
+  onShowMenu: () => void;
+  sidebarVisible: boolean;
   canvasRef: React.RefObject<HTMLDivElement>;
   points: DataPoint[];
   zones: Zone[];
   onApplyColorScheme: (scheme: string) => void;
+  searchTerm: string;
+  onSearchTermChange: (value: string) => void;
 }
 
 export function MatrixToolbar({
   onLoadPreset, background, onUpdateBackground,
-  onUndo, onRedo, canUndo, canRedo, canvasRef, points, zones, onApplyColorScheme
+  onUndo, onRedo, canUndo, canRedo, onStartNew, onShowMenu, sidebarVisible,
+  canvasRef, points, zones, onApplyColorScheme, searchTerm, onSearchTermChange,
 }: MatrixToolbarProps) {
   const bgInputRef = useRef<HTMLInputElement>(null);
   const [darkMode, setDarkMode] = useState(() => {
@@ -60,12 +66,6 @@ export function MatrixToolbar({
     const a = document.createElement('a');
     a.href = url;a.download = 'matrix_data.csv';a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleShare = () => {
-    const url = window.location.origin + window.location.pathname;
-    navigator.clipboard.writeText(url);
-    toast.success('URL copied to clipboard');
   };
 
   return (
@@ -99,6 +99,11 @@ export function MatrixToolbar({
       <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => bgInputRef.current?.click()}>
         <Image className="w-3 h-3 mr-1" /> BG Image
       </Button>
+      {!sidebarVisible && (
+        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onShowMenu} title="Show menu">
+          <PanelLeft className="w-4 h-4" />
+        </Button>
+      )}
 
       {background.imageUrl &&
       <div className="flex items-center gap-2">
@@ -114,9 +119,22 @@ export function MatrixToolbar({
         </div>
       }
 
-      <div className="flex-1" />
+      <div className="flex-1 flex justify-center px-2 min-w-[220px]">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2 top-1/2 w-4 h-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search points..."
+            value={searchTerm}
+            onChange={(e) => onSearchTermChange(e.target.value)}
+            className="h-8 pl-8 text-xs"
+          />
+        </div>
+      </div>
 
       {/* Dark mode toggle */}
+      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={onStartNew}>
+        Start New
+      </Button>
       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDarkMode(!darkMode)}
       title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
         {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}

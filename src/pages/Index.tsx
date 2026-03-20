@@ -4,8 +4,7 @@ import { MatrixCanvas } from '@/components/MatrixCanvas';
 import { MatrixSidebar } from '@/components/MatrixSidebar';
 import { MatrixToolbar } from '@/components/MatrixToolbar';
 import { COLOR_SCHEMES } from '@/lib/presets';
-import { Input } from '@/components/ui/input';
-import { Search, PanelLeftClose, PanelLeft, Maximize, Minimize, Github } from 'lucide-react';
+import { Maximize, Minimize, Github } from 'lucide-react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Button } from '@/components/ui/button';
 import { distributePoints } from '@/lib/distributePoints';
@@ -17,7 +16,7 @@ const Index = () => {
     state, updateConfig,
     addPoint, updatePoint, deletePoint, setPoints, batchUpdatePoints, deletePoints, replaceMatrixData,
     addZone, updateZone, deleteZone,
-    updateBackground, loadPreset,
+    updateBackground, loadPreset, startNewSession,
     undo, redo, canUndo, canRedo,
   } = useMatrixState();
 
@@ -154,9 +153,6 @@ const Index = () => {
           <Button variant="ghost" size="icon" onClick={handleFullscreenToggle} title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen chart'}>
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => setSidebarVisible(v => !v)} title={sidebarVisible ? 'Hide menu' : 'Show menu'}>
-            {sidebarVisible ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-          </Button>
         </div>
       </div>
       <MatrixToolbar
@@ -167,10 +163,20 @@ const Index = () => {
         onRedo={redo}
         canUndo={canUndo}
         canRedo={canRedo}
+        onStartNew={() => {
+          startNewSession();
+          setSelectedIds(new Set());
+          setSearchTerm('');
+          setPlacementMode(false);
+        }}
+        onShowMenu={() => setSidebarVisible(true)}
+        sidebarVisible={sidebarVisible}
         canvasRef={canvasRef as React.RefObject<HTMLDivElement>}
         points={state.points}
         zones={state.zones}
         onApplyColorScheme={applyColorScheme}
+        searchTerm={searchTerm}
+        onSearchTermChange={setSearchTerm}
       />
       <div className="flex-1 overflow-hidden">
         <ResizablePanelGroup direction="horizontal" autoSaveId="matrix-main-layout">
@@ -211,15 +217,6 @@ const Index = () => {
           )}
           <ResizablePanel defaultSize={78}>
             <div className="flex flex-col h-full overflow-auto">
-              <div className="p-2 flex items-center gap-2">
-                <Search className="w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search points..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  className="h-8 text-xs max-w-xs"
-                />
-              </div>
               <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
                 <MatrixCanvas
                   config={state.config}
