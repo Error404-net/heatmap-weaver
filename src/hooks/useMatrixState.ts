@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { MatrixState, DataPoint, Zone, MatrixConfig, BackgroundConfig } from '@/types/matrix';
 import { PRESETS } from '@/lib/presets';
-import { parseCSV } from '@/lib/csvUtils';
+import { parseMatrixCSV } from '@/lib/csvUtils';
 
 function generateId() {
   return Math.random().toString(36).slice(2, 10);
@@ -115,13 +115,18 @@ export function useMatrixState() {
     pushHistory();
 
     let points = preset.points.map(p => ({ ...p }));
+    let zones = preset.zones.map(z => ({ ...z }));
+
     if (preset.pointsCsvPath) {
       try {
         const response = await fetch(preset.pointsCsvPath);
         if (!response.ok) throw new Error(`Failed to load ${preset.pointsCsvPath}`);
         const text = await response.text();
-        const parsed = parseCSV(text);
+        const parsed = parseMatrixCSV(text);
         points = parsed.points;
+        if (parsed.zones.length > 0) {
+          zones = parsed.zones;
+        }
       } catch (error) {
         console.error(error);
       }
@@ -130,7 +135,7 @@ export function useMatrixState() {
     setState(s => ({
       ...s,
       config: { ...preset.config },
-      zones: preset.zones.map(z => ({ ...z })),
+      zones,
       points: s.points.length > 0 ? s.points : points,
     }));
   }, [pushHistory]);
