@@ -26,6 +26,11 @@ const Index = () => {
   const [placementMode, setPlacementMode] = useState(false);
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [sidebarSize, setSidebarSize] = useState(24);
+
+  useEffect(() => {
+    if (!sidebarVisible) return;
+    setSidebarSize((size) => Math.min(32, Math.max(20, size)));
+  }, [sidebarVisible]);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handlePointMove = (id: string, x: number, y: number) => {
@@ -179,7 +184,7 @@ const Index = () => {
         onSearchTermChange={setSearchTerm}
       />
       <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" autoSaveId="matrix-main-layout">
+        <ResizablePanelGroup direction="horizontal">
           {sidebarVisible && (
             <>
               <ResizablePanel

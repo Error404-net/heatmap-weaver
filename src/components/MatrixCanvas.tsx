@@ -26,7 +26,6 @@ export function MatrixCanvas({
 }: MatrixCanvasProps) {
   const [dragging, setDragging] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState<{ cx: number; cy: number } | null>(null);
-  // Store initial positions of all selected points at drag start
   const initialPositions = useRef<Map<string, { x: number; y: number }>>(new Map());
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -34,13 +33,13 @@ export function MatrixCanvas({
   const rangeX = xMax - xMin;
   const rangeY = yMax - yMin;
 
-  const toCanvasX = (x: number) => PADDING + ((x - xMin) / rangeX) * CANVAS_SIZE;
-  const toCanvasY = (y: number) => PADDING + ((yMax - y) / rangeY) * CANVAS_SIZE;
-  const fromCanvasX = (cx: number) => xMin + ((cx - PADDING) / CANVAS_SIZE) * rangeX;
-  const fromCanvasY = (cy: number) => yMax - ((cy - PADDING) / CANVAS_SIZE) * rangeY;
+  const toCanvasX = useCallback((x: number) => PADDING + ((x - xMin) / rangeX) * CANVAS_SIZE, [rangeX, xMin]);
+  const toCanvasY = useCallback((y: number) => PADDING + ((yMax - y) / rangeY) * CANVAS_SIZE, [rangeY, yMax]);
+  const fromCanvasX = useCallback((cx: number) => xMin + ((cx - PADDING) / CANVAS_SIZE) * rangeX, [rangeX, xMin]);
+  const fromCanvasY = useCallback((cy: number) => yMax - ((cy - PADDING) / CANVAS_SIZE) * rangeY, [rangeY, yMax]);
 
-  const clampX = (x: number) => Math.max(xMin + 0.1, Math.min(xMax - 0.1, x));
-  const clampY = (y: number) => Math.max(yMin + 0.1, Math.min(yMax - 0.1, y));
+  const clampX = useCallback((x: number) => Math.max(xMin + 0.1, Math.min(xMax - 0.1, x)), [xMax, xMin]);
+  const clampY = useCallback((y: number) => Math.max(yMin + 0.1, Math.min(yMax - 0.1, y)), [yMax, yMin]);
 
   const totalW = CANVAS_SIZE + PADDING * 2;
   const totalH = CANVAS_SIZE + PADDING * 2;
@@ -52,7 +51,6 @@ export function MatrixCanvas({
     const cy = e.clientY - rect.top;
 
     if (selectedIds.has(dragging) && selectedIds.size > 1) {
-      // Compute delta in data coords from drag start
       const startDataX = fromCanvasX(dragStart.cx);
       const startDataY = fromCanvasY(dragStart.cy);
       const curDataX = fromCanvasX(cx);
@@ -79,6 +77,7 @@ export function MatrixCanvas({
 
   const handleMouseDown = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
+    e.stopPropagation();
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
 
@@ -93,7 +92,6 @@ export function MatrixCanvas({
       onSelectedIdsChange(newSelected);
     }
 
-    // Store initial positions for all selected points
     const posMap = new Map<string, { x: number; y: number }>();
     for (const sid of newSelected) {
       const p = points.find(pt => pt.id === sid);
@@ -126,11 +124,11 @@ export function MatrixCanvas({
     const cx = toCanvasX(v);
     gridLines.push(
       <line key={`vg-${i}`} x1={cx} y1={PADDING} x2={cx} y2={PADDING + CANVAS_SIZE}
-        stroke="hsl(0,0%,70%)" strokeWidth={0.5} strokeDasharray={i === 0 ? undefined : "2,4"} />
+        stroke="hsl(0,0%,70%)" strokeWidth={0.5} strokeDasharray={i === 0 ? undefined : '2,4'} />,
     );
     gridLines.push(
       <text key={`vl-${i}`} x={cx} y={PADDING + CANVAS_SIZE + 18} textAnchor="middle"
-        fontSize={11} fill="hsl(var(--foreground))">{v}</text>
+        fontSize={11} fill="hsl(var(--foreground))">{v}</text>,
     );
   }
   for (let i = 0; i <= rangeY; i++) {
@@ -138,16 +136,15 @@ export function MatrixCanvas({
     const cy = toCanvasY(v);
     gridLines.push(
       <line key={`hg-${i}`} x1={PADDING} y1={cy} x2={PADDING + CANVAS_SIZE} y2={cy}
-        stroke="hsl(0,0%,70%)" strokeWidth={0.5} strokeDasharray={i === 0 ? undefined : "2,4"} />
+        stroke="hsl(0,0%,70%)" strokeWidth={0.5} strokeDasharray={i === 0 ? undefined : '2,4'} />,
     );
     gridLines.push(
       <text key={`hl-${i}`} x={PADDING - 8} y={cy + 4} textAnchor="end"
-        fontSize={11} fill="hsl(var(--foreground))">{v}</text>
+        fontSize={11} fill="hsl(var(--foreground))">{v}</text>,
     );
   }
 
-  const isHighlighted = (p: DataPoint) =>
-    searchTerm && p.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const isHighlighted = (p: DataPoint) => searchTerm && p.name.toLowerCase().includes(searchTerm.toLowerCase());
 
   return (
     <div ref={canvasRef} className="relative inline-block bg-card rounded-lg border border-border shadow-sm">
@@ -161,18 +158,6 @@ export function MatrixCanvas({
         onMouseLeave={() => { setDragging(null); setDragStart(null); }}
         onClick={handleCanvasClick}
       >
-        {/* Background image */}
-        {background.imageUrl && (
-          <image
-            href={background.imageUrl}
-            x={PADDING} y={PADDING}
-            width={CANVAS_SIZE} height={CANVAS_SIZE}
-            opacity={background.imageOpacity}
-            preserveAspectRatio="xMinYMax slice"
-          />
-        )}
-
-        {/* Zone clip paths */}
         <defs>
           <pattern id="hatching" patternUnits="userSpaceOnUse" width={8} height={8}>
             <path d="M-1,1 l2,-2 M0,8 l8,-8 M7,9 l2,-2" stroke="hsla(0,0%,50%,0.4)" strokeWidth={1.5} />
@@ -184,6 +169,9 @@ export function MatrixCanvas({
             <stop offset="58%" stopColor="hsla(0, 0%, 100%, 0)" />
             <stop offset="100%" stopColor="hsla(0, 0%, 100%, 0)" />
           </linearGradient>
+          <filter id="selected-point-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="hsl(45,100%,50%)" floodOpacity="0.75" />
+          </filter>
           {zones.map(zone => (
             <clipPath key={`clip-${zone.id}`} id={`zone-clip-${zone.id}`}>
               <rect
@@ -196,18 +184,13 @@ export function MatrixCanvas({
           ))}
         </defs>
 
-        {/* Zones */}
+        {background.imageUrl && (
+          <image href={background.imageUrl} x={PADDING} y={PADDING} width={CANVAS_SIZE} height={CANVAS_SIZE} opacity={background.imageOpacity} preserveAspectRatio="xMinYMax slice" />
+        )}
+
         {zones.map(zone => (
           <g key={zone.id}>
-            <rect
-              x={toCanvasX(zone.x1)}
-              y={toCanvasY(zone.y2)}
-              width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
-              height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
-              fill={zone.color}
-              stroke="hsla(0,0%,0%,0.1)"
-              strokeWidth={1}
-            />
+            <rect x={toCanvasX(zone.x1)} y={toCanvasY(zone.y2)} width={toCanvasX(zone.x2) - toCanvasX(zone.x1)} height={toCanvasY(zone.y1) - toCanvasY(zone.y2)} fill={zone.color} stroke="hsla(0,0%,0%,0.1)" strokeWidth={1} />
             {zone.imageUrl && (() => {
               const zw = toCanvasX(zone.x2) - toCanvasX(zone.x1);
               const zh = toCanvasY(zone.y1) - toCanvasY(zone.y2);
@@ -216,75 +199,27 @@ export function MatrixCanvas({
               const sh = zh * scale;
               const cx = toCanvasX(zone.x1) + zw / 2;
               const cy = toCanvasY(zone.y2) + zh / 2;
-              return (
-                <image
-                  href={zone.imageUrl}
-                  x={cx - sw / 2}
-                  y={cy - sh / 2}
-                  width={sw}
-                  height={sh}
-                  opacity={zone.imageOpacity ?? 0.3}
-                  preserveAspectRatio="xMidYMid slice"
-                  clipPath={`url(#zone-clip-${zone.id})`}
-                />
-              );
+              return <image href={zone.imageUrl} x={cx - sw / 2} y={cy - sh / 2} width={sw} height={sh} opacity={zone.imageOpacity ?? 0.3} preserveAspectRatio="xMidYMid slice" clipPath={`url(#zone-clip-${zone.id})`} />;
             })()}
-            {zone.id === 'nogo' && (
-              <rect
-                x={toCanvasX(zone.x1)}
-                y={toCanvasY(zone.y2)}
-                width={toCanvasX(zone.x2) - toCanvasX(zone.x1)}
-                height={toCanvasY(zone.y1) - toCanvasY(zone.y2)}
-                fill="url(#hatching)"
-              />
-            )}
+            {zone.id === 'nogo' && <rect x={toCanvasX(zone.x1)} y={toCanvasY(zone.y2)} width={toCanvasX(zone.x2) - toCanvasX(zone.x1)} height={toCanvasY(zone.y1) - toCanvasY(zone.y2)} fill="url(#hatching)" />}
           </g>
         ))}
 
-        {config.showDiagonal && zones.length > 0 && (
-          <rect
-            x={PADDING}
-            y={PADDING}
-            width={CANVAS_SIZE}
-            height={CANVAS_SIZE}
-            fill="url(#diagonal-zone-fade)"
-            pointerEvents="none"
-          />
-        )}
+        {config.showDiagonal && zones.length > 0 && <rect x={PADDING} y={PADDING} width={CANVAS_SIZE} height={CANVAS_SIZE} fill="url(#diagonal-zone-fade)" pointerEvents="none" />}
 
-        {/* Zone labels */}
         {zones.map(zone => {
           const cx = (toCanvasX(zone.x1) + toCanvasX(zone.x2)) / 2;
           const cy = (toCanvasY(zone.y1) + toCanvasY(zone.y2)) / 2;
-          return (
-            <text key={`zl-${zone.id}`} x={cx} y={cy} textAnchor="middle"
-              dominantBaseline="middle" fontSize={13} fontWeight={600}
-              fill="hsla(0,0%,0%,0.6)" className="pointer-events-none">
-              {zone.name}
-            </text>
-          );
+          return <text key={`zl-${zone.id}`} x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize={13} fontWeight={600} fill="hsla(0,0%,0%,0.6)" className="pointer-events-none">{zone.name}</text>;
         })}
 
         {gridLines}
 
-        {config.showDiagonal && (
-          <line
-            x1={toCanvasX(config.diagonalPoints.x1)}
-            y1={toCanvasY(config.diagonalPoints.y1)}
-            x2={toCanvasX(config.diagonalPoints.x2)}
-            y2={toCanvasY(config.diagonalPoints.y2)}
-            stroke="hsl(0,0%,20%)" strokeWidth={2.5} strokeDasharray="6,3"
-          />
-        )}
+        {config.showDiagonal && <line x1={toCanvasX(config.diagonalPoints.x1)} y1={toCanvasY(config.diagonalPoints.y1)} x2={toCanvasX(config.diagonalPoints.x2)} y2={toCanvasY(config.diagonalPoints.y2)} stroke="hsl(0,0%,20%)" strokeWidth={2.5} strokeDasharray="6,3" />}
 
-        <text x={PADDING + CANVAS_SIZE / 2} y={totalH - 8} textAnchor="middle"
-          fontSize={14} fontWeight={700} fill="hsl(var(--foreground))">{config.xAxisLabel}</text>
-        <text x={14} y={PADDING + CANVAS_SIZE / 2} textAnchor="middle"
-          fontSize={14} fontWeight={700} fill="hsl(var(--foreground))"
-          transform={`rotate(-90, 14, ${PADDING + CANVAS_SIZE / 2})`}>{config.yAxisLabel}</text>
-
-        <text x={totalW / 2} y={24} textAnchor="middle" fontSize={18} fontWeight={800}
-          fill="hsl(var(--foreground))">{config.title}</text>
+        <text x={PADDING + CANVAS_SIZE / 2} y={totalH - 8} textAnchor="middle" fontSize={14} fontWeight={700} fill="hsl(var(--foreground))">{config.xAxisLabel}</text>
+        <text x={14} y={PADDING + CANVAS_SIZE / 2} textAnchor="middle" fontSize={14} fontWeight={700} fill="hsl(var(--foreground))" transform={`rotate(-90, 14, ${PADDING + CANVAS_SIZE / 2})`}>{config.yAxisLabel}</text>
+        <text x={totalW / 2} y={24} textAnchor="middle" fontSize={18} fontWeight={800} fill="hsl(var(--foreground))">{config.title}</text>
 
         {points.map(p => {
           const cx = Math.max(PADDING, Math.min(PADDING + CANVAS_SIZE, toCanvasX(p.x)));
@@ -292,47 +227,31 @@ export function MatrixCanvas({
           const highlighted = isHighlighted(p);
           const dimmed = searchTerm && !highlighted;
           const selected = selectedIds.has(p.id);
-          const iconSize = highlighted ? 18 : 14;
+          const iconSize = selected ? 20 : highlighted ? 18 : 14;
+          const labelWidth = Math.max(36, p.name.length * 6.6);
           return (
-            <g key={p.id}
-              onMouseDown={(e) => handleMouseDown(e, p.id)}
-              onClick={() => onPointClick(p.id)}
-              className="cursor-grab active:cursor-grabbing"
-              opacity={dimmed ? 0.2 : 1}
-            >
+            <g key={p.id} onMouseDown={(e) => handleMouseDown(e, p.id)} onClick={() => onPointClick(p.id)} className="cursor-grab active:cursor-grabbing" opacity={dimmed ? 0.2 : 1}>
               {selected && (
-                <circle cx={cx} cy={cy} r={p.iconUrl ? iconSize / 2 + 4 : 9}
-                  fill="none" stroke="hsl(45,100%,50%)" strokeWidth={2} strokeDasharray="3,2" />
+                <>
+                  <circle cx={cx} cy={cy} r={iconSize / 2 + 8} fill="hsla(45,100%,50%,0.18)" filter="url(#selected-point-glow)" />
+                  <circle cx={cx} cy={cy} r={iconSize / 2 + 5} fill="none" stroke="hsl(45,100%,50%)" strokeWidth={2.5} strokeDasharray="3,2" />
+                </>
               )}
               {p.iconUrl ? (
-                <image
-                  href={p.iconUrl}
-                  x={cx - iconSize / 2}
-                  y={cy - iconSize / 2}
-                  width={iconSize}
-                  height={iconSize}
-                  style={{ borderRadius: '2px' }}
-                />
+                <image href={p.iconUrl} x={cx - iconSize / 2} y={cy - iconSize / 2} width={iconSize} height={iconSize} preserveAspectRatio="xMidYMid meet" />
               ) : (
-                <circle cx={cx} cy={cy} r={highlighted ? 7 : 5}
-                  fill={highlighted ? 'hsl(45,100%,50%)' : 'hsl(220,80%,50%)'}
-                  stroke={selected ? 'hsl(45,100%,50%)' : 'hsl(0,0%,100%)'} strokeWidth={selected ? 2 : 1.5} />
+                <circle cx={cx} cy={cy} r={highlighted ? 7 : 5} fill={highlighted ? 'hsl(45,100%,50%)' : 'hsl(220,80%,50%)'} stroke={selected ? 'hsl(45,100%,50%)' : 'hsl(0,0%,100%)'} strokeWidth={selected ? 2 : 1.5} />
               )}
-              <title>{`${p.name} (${p.x}, ${p.y})`}</title>
-              <text x={cx + (p.iconUrl ? iconSize / 2 + 3 : 8)} y={cy + 4} fontSize={10} fill="hsl(var(--foreground))"
-                className="pointer-events-none">{p.name}</text>
+              <rect x={cx + 8} y={cy - 11} width={labelWidth} height={18} rx={9} fill={selected ? 'hsla(45, 100%, 50%, 0.92)' : 'hsla(0,0%,100%,0.72)'} stroke={selected ? 'hsla(38, 92%, 35%, 0.9)' : 'hsla(0,0%,0%,0.08)'} strokeWidth={selected ? 1.2 : 1} />
+              <text x={cx + 14} y={cy + 2} fontSize={selected ? 12.5 : 12} fontWeight={selected ? 700 : 500} fill="hsl(var(--foreground))">{p.name}</text>
             </g>
-           );
+          );
         })}
-        {placementMode && (
-          <g className="pointer-events-none">
-            <rect x={PADDING} y={PADDING} width={CANVAS_SIZE} height={CANVAS_SIZE}
-              fill="hsla(210,80%,50%,0.08)" />
-            <text x={totalW / 2} y={totalH / 2} textAnchor="middle" fontSize={16} fontWeight={700}
-              fill="hsl(210,80%,50%)" opacity={0.7}>
-              Click to place {selectedIds.size} point{selectedIds.size !== 1 ? 's' : ''}
-            </text>
-          </g>
+
+        {placementMode && selectedIds.size > 0 && (
+          <text x={totalW / 2} y={46} textAnchor="middle" fontSize={12} fontWeight={600} fill="hsl(var(--primary))">
+            Click to place {selectedIds.size} point{selectedIds.size !== 1 ? 's' : ''}
+          </text>
         )}
       </svg>
     </div>

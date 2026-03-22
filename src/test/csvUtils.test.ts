@@ -66,21 +66,23 @@ describe('csvUtils matrix CSV support', () => {
     expect(parsed.points[0]).toMatchObject({ name: 'Firefox', x: 7, y: 4.8 });
   });
 
-  it('loads the Enterprise Browsers seed with Google Ultron in the unicorn zone', () => {
+  it('loads the Enterprise Browsers seed with local icons and the updated matrix zones', () => {
     const csvPath = path.resolve(__dirname, '../../public/data/enterprise-browsers.csv');
     const parsed = parseMatrixCSV(fs.readFileSync(csvPath, 'utf8'));
-    const unicornZone = PRESETS.find((preset) => preset.id === 'enterprise-browsers')?.zones.find((zone) => zone.id === 'unicorn');
-    const googleUltron = parsed.points.find((point) => point.name === 'Google Ultron');
+    const unicornZone = parsed.zones.find((zone) => zone.name === 'Unicorn Zone');
+    const island = parsed.points.find((point) => point.name === 'Island Enterprise Browser');
 
     expect(parsed.errors).toEqual([]);
+    expect(parsed.zones).toHaveLength(6);
     expect(parsed.points.some((point) => point.name === 'Safari')).toBe(true);
     expect(parsed.points.some((point) => point.name === 'Firefox')).toBe(true);
-    expect(parsed.points.find((point) => point.name === 'Chrome Enterprise')?.iconUrl).toBe('/data/browser-icons/chrome.svg');
-    expect(googleUltron).toBeDefined();
+    expect(parsed.points.find((point) => point.name === 'Chrome')?.iconUrl).toBe('/data/browser-icons/chrome.svg');
+    expect(island?.iconUrl).toBe('/data/browser-icons/island-enterprise-browser.svg');
     expect(unicornZone).toBeDefined();
-    expect(googleUltron!.x).toBeGreaterThanOrEqual(unicornZone!.x1);
-    expect(googleUltron!.x).toBeLessThanOrEqual(unicornZone!.x2);
-    expect(googleUltron!.y).toBeGreaterThanOrEqual(unicornZone!.y1);
-    expect(googleUltron!.y).toBeLessThanOrEqual(unicornZone!.y2);
+    expect(island).toBeDefined();
+    expect(island!.x).toBeGreaterThanOrEqual(8);
+    expect(island!.x).toBeLessThanOrEqual(10);
+    expect(island!.y).toBeGreaterThanOrEqual(2);
+    expect(island!.y).toBeLessThanOrEqual(5);
   });
 });

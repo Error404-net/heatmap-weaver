@@ -350,7 +350,7 @@ export function MatrixSidebar({
             {/* Points list */}
             <div className="space-y-1">
               {points.map(p => (
-                <div key={p.id} className="py-1 px-1 rounded hover:bg-muted text-xs group">
+                <div key={p.id} className={`py-1 px-1 rounded text-xs group transition-colors ${selectedIds.has(p.id) ? 'bg-amber-100/80 ring-1 ring-amber-400 dark:bg-amber-500/15 dark:ring-amber-300/70' : 'hover:bg-muted'}`}>
                   {editingId === p.id ? (
                     <div className="space-y-1">
                       <Input value={editName} onChange={e => setEditName(e.target.value)}

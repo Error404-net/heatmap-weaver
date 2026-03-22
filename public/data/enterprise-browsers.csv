@@ -1,18 +1,44 @@
-name,x,y,category,notes,icon_url
-Google Ultron,9.4,1.0,Unicorn,Intentionally placed in unicorn position,
-Island Enterprise Browser,8.9,2.7,Enterprise Secure Browser,Remote browser isolation focus,/data/browser-icons/island.svg
-Talon,8.6,3.1,Enterprise Secure Browser,Enterprise security posture,/data/browser-icons/talon.svg
-Palo Alto Prisma Access Browser,8.2,3.8,Enterprise Secure Browser,SASE-adjacent secure browser,/data/browser-icons/prisma-access-browser.svg
-Citrix Secure Private Access Browser,7.9,3.6,Enterprise Secure Browser,Enterprise access workflow,/data/browser-icons/citrix.svg
-Surf Security Browser,7.7,4.0,Enterprise Secure Browser,Security-led managed browser,/data/browser-icons/surf-security.svg
-Firefox,7.0,4.8,Mainstream Browser,Strong admin story but less enterprise-native,/data/browser-icons/firefox.svg
-Safari,6.8,3.9,Mainstream Browser,Important platform browser for Apple environments,/data/browser-icons/safari.svg
-Chrome Enterprise,8.1,4.6,Enterprise Browser,Common enterprise default,/data/browser-icons/chrome.svg
-Microsoft Edge for Business,8.4,4.4,Enterprise Browser,Very common managed enterprise browser,/data/browser-icons/edge.svg
-Brave,6.4,5.1,Consumer Privacy Browser,Security-conscious but not enterprise-first,/data/browser-icons/brave.svg
-Opera,5.8,6.0,Consumer Browser,General browser placeholder,/data/browser-icons/opera.svg
-QQ Browser,3.8,7.2,Risky Browser,Placeholder risk example,/data/browser-icons/qq-browser.svg
-FakeUpdate Browser Loader,2.0,8.5,Malware,Malware placeholder,
-RedLine Infostealer Shell,1.5,9.2,Malware,Malware placeholder,
-BrowserHijack Pro,2.8,8.0,Malware,Malware placeholder,
-Tor Browser,5.5,7.1,Specialized Browser,Useful but potentially “crazy” in enterprise policy contexts,/data/browser-icons/tor.svg
+record_type,name,x,y,category,notes,icon_url,color,x1,y1,x2,y2,image_url,image_opacity,image_scale
+zone,No-Go Zone,,,,,,"hsla(0, 70%, 60%, 0.5)",0.0,0.0,5.0,10.0,,,
+zone,Fun Zone,,,,,,"hsla(270, 50%, 60%, 0.5)",5.0,0.0,8.0,5.0,,,
+zone,Danger Zone,,,,,,"hsla(30, 90%, 55%, 0.5)",5.0,5.0,8.0,10.0,,,
+zone,Date Zone,,,,,,"hsla(195, 80%, 60%, 0.5)",8.0,5.0,10.0,10.0,,,
+zone,Unicorn Zone,,,,,,"hsla(300, 80%, 75%, 0.5)",8.0,0.0,10.0,2.0,,,
+zone,Wife Zone,,,,,,"hsla(120, 70%, 55%, 0.5)",8.0,2.0,10.0,5.0,,,
+point,Chrome,8.15,4.45,Enterprise Browser,Enterprise standard,/data/browser-icons/chrome.svg,,,,,,,,
+point,Microsoft Edge,8.55,4.25,Enterprise Browser,M365 integration,/data/browser-icons/edge.svg,,,,,,,,
+point,Firefox,8.45,5.55,Mainstream Browser,Strong policies,/data/browser-icons/firefox.svg,,,,,,,,
+point,Safari,9.15,5.2,Mainstream Browser,Apple default,/data/browser-icons/safari.svg,,,,,,,,
+point,Opera,6.6,5.35,Consumer Browser,General use,/data/browser-icons/opera.svg,,,,,,,,
+point,Chromium,7.55,5.0,Engine Base,Base engine,/data/browser-icons/chrome.svg,,,,,,,,
+point,Tor Browser,6.15,7.05,Specialized Browser,Anonymity,/data/browser-icons/tor.svg,,,,,,,,
+point,Island Enterprise Browser,8.75,2.7,Enterprise Secure Browser,RBI,/data/browser-icons/island-enterprise-browser.svg,,,,,,,,
+point,Talon,8.45,3.1,Enterprise Secure Browser,Secure browser,/data/browser-icons/talon-security.svg,,,,,,,,
+point,Prisma Access Browser,8.1,3.8,Enterprise Secure Browser,SASE,/data/browser-icons/prisma-access-browser.svg,,,,,,,,
+point,Citrix Secure Browser,8.3,3.35,Enterprise Secure Browser,VDI hybrid,/data/browser-icons/citrix-secure-browser.svg,,,,,,,,
+point,Surf Security Browser,8.75,4.15,Enterprise Secure Browser,Managed,/data/browser-icons/surf-security-browser.svg,,,,,,,,
+point,Ivanti Velocity,7.9,6.5,Kiosk Browser,Industrial browser,/data/browser-icons/ivanti-velocity.svg,,,,,,,,
+point,Zebra Enterprise Browser,8.15,6.75,Kiosk Browser,Zebra devices,/data/browser-icons/zebra-enterprise-browser.svg,,,,,,,,
+point,42Gears SureFox,8.05,7.15,Kiosk Browser,Android lockdown,/data/browser-icons/42gears-surefox.svg,,,,,,,,
+point,KioWare,7.25,7.8,Kiosk Browser,Windows kiosk,/data/browser-icons/kioware.svg,,,,,,,,
+point,Fully Kiosk Browser,7.8,7.85,Kiosk Browser,Android kiosk,/data/browser-icons/fully-kiosk-browser.svg,,,,,,,,
+point,SiteKiosk,7.45,7.45,Kiosk Browser,Commercial kiosk,/data/browser-icons/sitekiosk.svg,,,,,,,,
+point,Kiosk Pro,7.95,7.8,Kiosk Browser,iOS kiosk,/data/browser-icons/kiosk-pro.svg,,,,,,,,
+point,Hexnode Browser,7.35,7.2,Kiosk Browser,MDM browser,/data/browser-icons/hexnode-browser.svg,,,,,,,,
+point,BlackBerry Access,8.45,6.95,Enterprise Secure Browser,Secure access,/data/browser-icons/blackberry-access.svg,,,,,,,,
+point,QQ Browser,3.95,6.95,Risky Browser,Data concerns,/data/browser-icons/qq-browser.svg,,,,,,,,
+point,UC Browser,3.45,7.45,Risky Browser,Legacy mobile,/data/browser-icons/uc-browser.svg,,,,,,,,
+point,Maxthon,4.35,7.9,Niche Browser,Cloud sync,/data/browser-icons/maxthon.svg,,,,,,,,
+point,Dolphin Browser,4.55,7.6,Niche Browser,Gesture browser,/data/browser-icons/dolphin-browser.svg,,,,,,,,
+point,Internet Explorer,6.0,7.95,Legacy Browser,Deprecated,/data/browser-icons/internet-explorer.svg,,,,,,,,
+point,Pale Moon,5.15,8.15,Niche Browser,Firefox fork,/data/browser-icons/pale-moon.svg,,,,,,,,
+point,SeaMonkey,4.95,8.45,Niche Browser,Legacy suite,/data/browser-icons/seamonkey.svg,,,,,,,,
+point,K-Meleon,4.55,8.75,Niche Browser,Ultra lightweight,/data/browser-icons/k-meleon.svg,,,,,,,,
+point,Avant Browser,4.1,9.0,Niche Browser,IE wrapper,/data/browser-icons/avant-browser.svg,,,,,,,,
+point,Slimjet,3.65,9.25,Niche Browser,Chromium fork,/data/browser-icons/slimjet.svg,,,,,,,,
+point,Torch Browser,3.45,8.7,Risky Browser,Adware history,/data/browser-icons/torch-browser.svg,,,,,,,,
+point,Comodo Dragon,3.2,8.95,Risky Browser,Security branding mismatch,/data/browser-icons/comodo-dragon.svg,,,,,,,,
+point,SRWare Iron,3.0,9.2,Risky Browser,Privacy claims,/data/browser-icons/srware-iron.svg,,,,,,,,
+point,360 Browser,2.55,9.45,Risky Browser,Chinese ecosystem,/data/browser-icons/360-browser.svg,,,,,,,,
+point,Coc Coc,3.2,8.2,Niche Browser,Vietnam browser,/data/browser-icons/coc-coc.svg,,,,,,,,
+point,Yandex Browser,4.2,7.95,Niche Browser,Russian ecosystem,/data/browser-icons/yandex-browser.svg,,,,,,,,
